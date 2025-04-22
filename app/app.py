@@ -3,6 +3,21 @@ import zipfile
 import json
 from io import BytesIO
 from docx import Document
+from datetime import datetime
+
+# Function to get current timestamp with milliseconds
+def get_timestamp():
+    now = datetime.now()
+    return now.strftime("%H:%M:%S.%f")  # Format: HH:MM:SS.mmmmmm
+
+# Initialize log message list
+log_messages = []
+
+# Function to log messages with timestamp
+def log(msg: str):
+    timestamp = get_timestamp()
+    full_msg = f"[{timestamp}] {msg}"
+    log_messages.append(full_msg)
 
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
@@ -50,16 +65,16 @@ if uploaded_file is not None:
                         try:
                             with zip_file.open(name) as file:
                                 data = json.load(file)
-                                log_messages.append(f"✅ Loaded: {name}")
+                                log(f"Loaded: {name}")
 
                                 st.markdown(f"### 📄 File: `{name}`")
-                                st.json(data)
+                                #st.json(data)
 
                                 # Generate Markdown
                                 if include_markdown:
                                     markdown_output = json.dumps(data, indent=2)
                                     st.download_button(f"⬇ Download Markdown ({name})", markdown_output, file_name=f"{name}.md")
-                                    log_messages.append(f"📄 Markdown generated: {name}.md")
+                                    log(f"Markdown generated: {name}.md")
 
                                 # Generate Word
                                 if include_word:
@@ -70,11 +85,11 @@ if uploaded_file is not None:
                                     buffer = BytesIO()
                                     doc.save(buffer)
                                     st.download_button(f"⬇ Download Word (.docx) ({name})", buffer.getvalue(), file_name=f"{name}.docx")
-                                    log_messages.append(f"📄 Word doc generated: {name}.docx")
+                                    log(f"Word doc generated: {name}.docx")
 
                         except Exception as e:
-                            error_msg = f"❌ Error processing {name}: {e}"
-                            log_messages.append(error_msg)
+                            error_msg = f"Error processing {name}: {e}"
+                            log(error_msg)
 
                         # Update progress bar
                         progress = idx / total_files
@@ -83,12 +98,20 @@ if uploaded_file is not None:
 
         # Done message
         status_text.success("🎉 All files processed!")
+        log(f"All files processed.")
 
     except Exception as e:
         st.error(f"❌ Failed to open ZIP: {e}")
-        log_messages.append(f"❌ Failed to open ZIP: {e}")
+        log(f"Failed to open ZIP: {e}")
 
-    # Activity log
+    # Activity log section
     st.subheader("📜 Activity Log")
+
+    # Prepare log string
     log_str = "\n".join(log_messages)
+
+    # Display the download button to save the log
+    st.download_button("📥 Download Log", log_str, file_name="xoul_log.txt")
+
+    # Show log output with timestamps in a scrollable code block
     st.code(log_str, language="bash")
