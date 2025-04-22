@@ -6,8 +6,25 @@ from io import BytesIO
 from docx import Document
 from datetime import datetime
 
+# Session state for user options
 if "user_options_disabled" not in st.session_state:
     st.session_state.user_options_disabled = False
+
+# Session state for holding output
+if "processed" not in st.session_state:
+    st.session_state.processed = False
+if "output_zip" not in st.session_state:
+    st.session_state.output_zip = None
+if "log_output" not in st.session_state:
+    st.session_state.log_output = ""
+if "log_messages" not in st.session_state:
+    st.session_state.log_messages = []
+if "total_files" not in st.session_state:
+    st.session_state.total_files = 0
+
+# flags
+reset_button_visible = False
+process_button_visible = False
 
 # Function to disable the user options
 def disable_user_options():
@@ -17,10 +34,38 @@ def disable_user_options():
 def enable_user_options():
     st.session_state.user_options_disabled = False
 
+# reset everything
+def reset_app():
+    enable_user_options()
+    st.session_state.processed = False
+    st.session_state.output_zip = None
+    st.session_state.log_output = ""
+    st.session_state.log_messages = []
+    st.session_state.total_files = 0
+
 # Function to get current timestamp with milliseconds
 def get_timestamp():
     now = datetime.now()
     return now.strftime("%H:%M:%S.%f")  # Format: HH:MM:SS.mmmmmm
+
+# Function to show reset button
+def show_reset_button():
+    global reset_button_visible
+    
+    if not reset_button_visible:
+        reset_button_visible = True
+        func_button_col2.button("⬅️ Restart (Clears Results)", on_click=reset_app)
+
+# Function to show process button
+def show_process_button():
+    global process_button_visible
+    
+    if not process_button_visible:
+        process_button_visible = True
+        with func_button_col1:
+            process_button_internal = st.button("🚀 Process File", on_click=disable_user_options, type="primary", disabled=st.session_state.user_options_disabled)
+        
+        return process_button_internal
 
 # Initialize log message list
 log_messages = []
@@ -29,7 +74,7 @@ log_messages = []
 def log(msg: str):
     timestamp = get_timestamp()
     full_msg = f"[{timestamp}] {msg}"
-    log_messages.append(full_msg)
+    st.session_state.log_messages.append(full_msg)
 
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
@@ -63,18 +108,16 @@ if uploaded_file is not None:
     # Show process button
     func_button_col1, func_button_col2 = st.columns(2)
     
-    with func_button_col1:
-        process_button = st.button("🚀 Process File", on_click=disable_user_options, type="primary")
-    
-    if process_button:
-        func_button_col2.button("⬅️ Restart (Clears Results)", on_click=enable_user_options)
+    process_button = show_process_button()
+
+    if process_button and not st.session_state.processed:
+        
+        show_reset_button();
 
         st.subheader("Step 4: Wait for Processing to Finish", divider=True)        
         # Progress bar
         progress_bar = st.progress(0)
         status_text = st.empty()
-
-        st.subheader("Step 5: Download Results", divider=True)
 
         try:
             zip_bytes = BytesIO(uploaded_file.read())
@@ -84,9 +127,9 @@ if uploaded_file is not None:
 
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
                 file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
-                total_files = len(file_list)
+                st.session_state.total_files = len(file_list)
 
-                if total_files == 0:
+                if st.session_state.total_files == 0:
                     st.warning("No JSON files found in the ZIP.")
                 else:
                     st.subheader("📁 Contents of ZIP:")
@@ -126,38 +169,49 @@ if uploaded_file is not None:
                                 log(error_msg)
 
                             # Update progress bar
-                            progress = idx / total_files
+                            progress = idx / st.session_state.total_files
                             progress_bar.progress(progress)
-                            status_text.text(f"Processed {idx} of {total_files} files...")
+                            status_text.text(f"Processed {idx} of {st.session_state.total_files} files...")
 
                 # Finish writing to ZIP
                 output_zip_buffer.seek(0)
 
-                # Show final download
-                st.download_button("📦 Download All Output Files (ZIP)", output_zip_buffer.getvalue(), file_name="xoul_outputs.zip")
-                log("Final ZIP download ready.")
+                # Done message
+                # TODO: add success and error files count
+                status_text.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")
+                log(f"{st.session_state.total_files}/{st.session_state.total_files} files processed.")
 
-            # Done message
-            status_text.success("🎉 All files processed!")
-            log(f"All files processed.")
+                # save results
+                st.session_state.output_zip = output_zip_buffer.getvalue()
+                st.session_state.processed = True
+                st.session_state.log_output = "\n".join(st.session_state.log_messages)
 
         except Exception as e:
             st.error(f"❌ Failed to open ZIP: {e}")
             log(f"Failed to open ZIP: {e}")
 
+    if st.session_state.processed:            
+        show_reset_button();
+
+        st.subheader("Step 4: Wait for Processing to Finish", divider=True)        
+        # Progress bar
+        progress_bar = st.progress(100)
+        status_text = st.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")
+
+        st.subheader("Step 5: Download Results", divider=True)
+        
+        # Show final download
+        output_download_timestamp = get_timestamp()
+        st.download_button("📦 Download All Output Files (ZIP)", st.session_state.output_zip, file_name=f"{output_download_timestamp}_converted_xoul_data.zip")
+        log("Final ZIP download ready.")
+
         # Activity log section
         st.subheader("📜 Debug Log", divider=True)
-        st.markdown("Send this to Vector if you run into problems. **DOWNLOAD YOUR FILE FIRST**, clicking the 📥 Download Log button will reset the form and you'll lose the results!")
-
-        # Prepare log string
-        log_str = "\n".join(log_messages)
+        st.markdown("Send this to Vector if you run into problems.")
 
         # Display the download button to save the log
         log_download_timestamp = get_timestamp()
-        st.download_button("📥 Download Log", log_str, file_name=f"{log_download_timestamp}_xoul_convert_log.txt") # TODO: hold results in memory so this doesn't happen
+        st.download_button("📥 Download Log", st.session_state.log_output, file_name=f"{log_download_timestamp}_xoul_convert_log.txt") 
 
         # Show log output with timestamps in a scrollable code block
-        st.code(log_str, language="bash")
-
-        enable_user_options()
-
+        st.code(st.session_state.log_output, language="bash")
