@@ -1,6 +1,7 @@
 import streamlit as st
 import zipfile
 import json
+import time
 from io import BytesIO
 from docx import Document
 from datetime import datetime
@@ -30,9 +31,7 @@ def log(msg: str):
     full_msg = f"[{timestamp}] {msg}"
     log_messages.append(full_msg)
 
-
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
-
 
 st.title("📄 Xoul AI Data Converter")
 
@@ -91,41 +90,40 @@ if uploaded_file is not None:
                     for name in zip_file.namelist():
                         st.text(name)
 
-                    with st.spinner("🔄 Processing files..."):
-                        for idx, name in enumerate(file_list, start=1):
-                            try:
-                                with zip_file.open(name) as file:
-                                    data = json.load(file)
-                                    log(f"Loaded: {name}")
+                    for idx, name in enumerate(file_list, start=1):
+                        try:
+                            with zip_file.open(name) as file:
+                                data = json.load(file)
+                                log(f"Loaded: {name}")
 
-                                    st.markdown(f"### 📄 File: `{name}`")
-                                    #st.json(data)
+                                st.markdown(f"### 📄 File: `{name}`")
+                                #st.json(data)
 
-                                    # Generate Markdown
-                                    if include_markdown:
-                                        markdown_output = json.dumps(data, indent=2)
-                                        st.download_button(f"⬇ Download Markdown ({name})", markdown_output, file_name=f"{name}.md")
-                                        log(f"Markdown generated: {name}.md")
+                                # Generate Markdown
+                                if include_markdown:
+                                    markdown_output = json.dumps(data, indent=2)
+                                    st.download_button(f"⬇ Download Markdown ({name})", markdown_output, file_name=f"{name}.md")
+                                    log(f"Markdown generated: {name}.md")
 
-                                    # Generate Word
-                                    if include_word:
-                                        doc = Document()
-                                        doc.add_heading("Generated Document", 0)
-                                        doc.add_paragraph(json.dumps(data, indent=2))
+                                # Generate Word
+                                if include_word:
+                                    doc = Document()
+                                    doc.add_heading("Generated Document", 0)
+                                    doc.add_paragraph(json.dumps(data, indent=2))
 
-                                        buffer = BytesIO()
-                                        doc.save(buffer)
-                                        st.download_button(f"⬇ Download Word (.docx) ({name})", buffer.getvalue(), file_name=f"{name}.docx")
-                                        log(f"Word doc generated: {name}.docx")
+                                    buffer = BytesIO()
+                                    doc.save(buffer)
+                                    st.download_button(f"⬇ Download Word (.docx) ({name})", buffer.getvalue(), file_name=f"{name}.docx")
+                                    log(f"Word doc generated: {name}.docx")
 
-                            except Exception as e:
-                                error_msg = f"Error processing {name}: {e}"
-                                log(error_msg)
+                        except Exception as e:
+                            error_msg = f"Error processing {name}: {e}"
+                            log(error_msg)
 
-                            # Update progress bar
-                            progress = idx / total_files
-                            progress_bar.progress(progress)
-                            status_text.text(f"Processed {idx} of {total_files} files...")
+                        # Update progress bar
+                        progress = idx / total_files
+                        progress_bar.progress(progress)
+                        status_text.text(f"Processed {idx} of {total_files} files...")
 
             # Done message
             status_text.success("🎉 All files processed!")
@@ -150,4 +148,4 @@ if uploaded_file is not None:
         st.code(log_str, language="bash")
 
         enable_user_options()
-        
+
