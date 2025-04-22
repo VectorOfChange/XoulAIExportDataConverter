@@ -79,6 +79,9 @@ if uploaded_file is not None:
         try:
             zip_bytes = BytesIO(uploaded_file.read())
 
+            # Create a new in-memory zip to hold output files
+            output_zip_buffer = BytesIO()
+
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
                 file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
                 total_files = len(file_list)
@@ -90,40 +93,49 @@ if uploaded_file is not None:
                     for name in zip_file.namelist():
                         st.text(name)
 
-                    for idx, name in enumerate(file_list, start=1):
-                        try:
-                            with zip_file.open(name) as file:
-                                data = json.load(file)
-                                log(f"Loaded: {name}")
+                    # Open output ZIP
+                    with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip:
+                        for idx, name in enumerate(file_list, start=1):
+                            try:
+                                with zip_file.open(name) as file:
+                                    data = json.load(file)
+                                    log(f"Loaded: {name}")
 
-                                st.markdown(f"### 📄 File: `{name}`")
-                                #st.json(data)
+                                    st.markdown(f"### 📄 File: `{name}`")
 
-                                # Generate Markdown
-                                if include_markdown:
-                                    markdown_output = json.dumps(data, indent=2)
-                                    st.download_button(f"⬇ Download Markdown ({name})", markdown_output, file_name=f"{name}.md")
-                                    log(f"Markdown generated: {name}.md")
+                                    # Generate Markdown
+                                    if include_markdown:
+                                        markdown_output = json.dumps(data, indent=2)
+                                        md_filename = name.replace(".json", ".md")
+                                        output_zip.writestr(md_filename, markdown_output)
+                                        log(f"Markdown added to ZIP: {md_filename}")
 
-                                # Generate Word
-                                if include_word:
-                                    doc = Document()
-                                    doc.add_heading("Generated Document", 0)
-                                    doc.add_paragraph(json.dumps(data, indent=2))
+                                    # Generate Word
+                                    if include_word:
+                                        doc = Document()
+                                        doc.add_heading("Generated Document", 0)
+                                        doc.add_paragraph(json.dumps(data, indent=2))
+                                        doc_buffer = BytesIO()
+                                        doc.save(doc_buffer)
+                                        doc_filename = name.replace(".json", ".docx")
+                                        output_zip.writestr(doc_filename, doc_buffer.getvalue())
+                                        log(f"Word doc added to ZIP: {doc_filename}")
 
-                                    buffer = BytesIO()
-                                    doc.save(buffer)
-                                    st.download_button(f"⬇ Download Word (.docx) ({name})", buffer.getvalue(), file_name=f"{name}.docx")
-                                    log(f"Word doc generated: {name}.docx")
+                            except Exception as e:
+                                error_msg = f"Error processing {name}: {e}"
+                                log(error_msg)
 
-                        except Exception as e:
-                            error_msg = f"Error processing {name}: {e}"
-                            log(error_msg)
+                            # Update progress bar
+                            progress = idx / total_files
+                            progress_bar.progress(progress)
+                            status_text.text(f"Processed {idx} of {total_files} files...")
 
-                        # Update progress bar
-                        progress = idx / total_files
-                        progress_bar.progress(progress)
-                        status_text.text(f"Processed {idx} of {total_files} files...")
+                # Finish writing to ZIP
+                output_zip_buffer.seek(0)
+
+                # Show final download
+                st.download_button("📦 Download All Output Files (ZIP)", output_zip_buffer.getvalue(), file_name="xoul_outputs.zip")
+                log("Final ZIP download ready.")
 
             # Done message
             status_text.success("🎉 All files processed!")
