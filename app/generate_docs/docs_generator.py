@@ -1,6 +1,6 @@
 # generate_docs/docs_generator.py
 
-from app.generate_docs.generate_word_docs import generate_word_docs
+from generate_docs.generate_word_docs import generate_word_docs
 from utils.custom_logger import log
 from models.all_data import AllData
 
