@@ -28,5 +28,5 @@ You need to have Python installed. If you don't, install Python 3.
         pip install -r requirements.txt
 7. Run the app:
 
-        streamlit run app.py
+        streamlit run main.py
 8. Your browser should automatically open a new tab and load the app. If it doesn't, browse to the address shown in the terminal. 

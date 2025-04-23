@@ -6,6 +6,10 @@ from io import BytesIO
 from docx import Document
 from datetime import datetime
 
+from app.extract.json_extractor import extract_data
+from app.utils.custom_logger import log
+from app.utils.custom_timestamp import get_timestamp
+
 # Session state for user options
 if "user_options_disabled" not in st.session_state:
     st.session_state.user_options_disabled = False
@@ -43,11 +47,6 @@ def reset_app():
     st.session_state.log_messages = []
     st.session_state.total_files = 0
 
-# Function to get current timestamp with milliseconds
-def get_timestamp():
-    now = datetime.now()
-    return now.strftime("%H:%M:%S.%f")  # Format: HH:MM:SS.mmmmmm
-
 # Function to show reset button
 def show_reset_button():
     global reset_button_visible
@@ -66,15 +65,6 @@ def show_process_button():
             process_button_internal = st.button("🚀 Process File", on_click=disable_user_options, type="primary", disabled=st.session_state.user_options_disabled)
         
         return process_button_internal
-
-# Initialize log message list
-log_messages = []
-
-# Function to log messages with timestamp
-def log(msg: str):
-    timestamp = get_timestamp()
-    full_msg = f"[{timestamp}] {msg}"
-    st.session_state.log_messages.append(full_msg)
 
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
@@ -95,9 +85,6 @@ include_word = st.checkbox("Include Word (.docx) output", value=True, disabled=s
 
 st.subheader("Step 2: Upload File", divider=True)
 uploaded_file = st.file_uploader("Upload your Xoul AI Data Export Zip file", type=["zip"])
-
-# Initialize log message list
-log_messages = []
 
 if uploaded_file is not None:
     st.success("✅ ZIP file uploaded!")
@@ -126,55 +113,63 @@ if uploaded_file is not None:
             output_zip_buffer = BytesIO()
 
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
-                file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
-                st.session_state.total_files = len(file_list)
+                # NEW
+                all_data = extract_data(zip_file, on_progress=lambda p: progress_bar.progress(p))
+                # END NEW
 
-                if st.session_state.total_files == 0:
-                    st.warning("No JSON files found in the ZIP.")
-                else:
-                    st.subheader("📁 Contents of ZIP:")
-                    for name in zip_file.namelist():
-                        st.text(name)
+                st.subheader("Contents of Characters")
+                st.json(all_data)
 
-                    # Open output ZIP
-                    with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip:
-                        for idx, name in enumerate(file_list, start=1):
-                            try:
-                                with zip_file.open(name) as file:
-                                    data = json.load(file)
-                                    log(f"Loaded: {name}")
+                # file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
+                # st.session_state.total_files = len(file_list)
 
-                                    st.markdown(f"### 📄 File: `{name}`")
+                # if st.session_state.total_files == 0:
+                #     st.warning("No JSON files found in the ZIP.")
+                # else:
+                #     st.subheader("📁 Contents of ZIP:")
+                #     for name in zip_file.namelist():
+                #         st.text(name)
 
-                                    # Generate Markdown
-                                    if include_markdown:
-                                        markdown_output = json.dumps(data, indent=2)
-                                        md_filename = name.replace(".json", ".md")
-                                        output_zip.writestr(md_filename, markdown_output)
-                                        log(f"Markdown added to ZIP: {md_filename}")
+                #     # Open output ZIP
+                #     with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip:
+                #         for idx, name in enumerate(file_list, start=1):
+                #             try:
+                #                 with zip_file.open(name) as file:
+                #                     data = json.load(file)
+                #                     log(f"Loaded: {name}")
 
-                                    # Generate Word
-                                    if include_word:
-                                        doc = Document()
-                                        doc.add_heading("Generated Document", 0)
-                                        doc.add_paragraph(json.dumps(data, indent=2))
-                                        doc_buffer = BytesIO()
-                                        doc.save(doc_buffer)
-                                        doc_filename = name.replace(".json", ".docx")
-                                        output_zip.writestr(doc_filename, doc_buffer.getvalue())
-                                        log(f"Word doc added to ZIP: {doc_filename}")
+                #                     st.markdown(f"### 📄 File: `{name}`")
 
-                            except Exception as e:
-                                error_msg = f"Error processing {name}: {e}"
-                                log(error_msg)
+                #                     # Generate Markdown
+                #                     if include_markdown:
+                #                         markdown_output = json.dumps(data, indent=2)
+                #                         md_filename = name.replace(".json", ".md")
+                #                         output_zip.writestr(md_filename, markdown_output)
+                #                         log(f"Markdown added to ZIP: {md_filename}")
 
-                            # Update progress bar
-                            progress = idx / st.session_state.total_files
-                            progress_bar.progress(progress)
-                            status_text.text(f"Processed {idx} of {st.session_state.total_files} files...")
+                #                     # Generate Word
+                #                     if include_word:
+                #                         doc = Document()
+                #                         doc.add_heading("Generated Document", 0)
+                #                         doc.add_paragraph(json.dumps(data, indent=2))
+                #                         doc_buffer = BytesIO()
+                #                         doc.save(doc_buffer)
+                #                         doc_filename = name.replace(".json", ".docx")
+                #                         output_zip.writestr(doc_filename, doc_buffer.getvalue())
+                #                         log(f"Word doc added to ZIP: {doc_filename}")
 
-                # Finish writing to ZIP
-                output_zip_buffer.seek(0)
+                #             except Exception as e:
+                #                 error_msg = f"Error processing {name}: {e}"
+                #                 log(error_msg)
+
+                #             # Update progress bar
+                #             progress = idx / st.session_state.total_files
+                #             progress_bar.progress(progress)
+                #             status_text.text(f"Processed {idx} of {st.session_state.total_files} files...")
+                #             # TODO: update status text and log to also indicate what function is happening
+
+                # # Finish writing to ZIP
+                # output_zip_buffer.seek(0)
 
                 # Done message
                 # TODO: add success and error files count
