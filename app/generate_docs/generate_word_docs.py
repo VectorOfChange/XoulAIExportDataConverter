@@ -2,10 +2,42 @@
 
 from io import BytesIO
 from docx import Document
+from docx.document import Document as DocxDocument
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement 
 from models.all_data import AllData
+from models.character import Character
+
+def add_character_to_doc(doc: DocxDocument, character: Character):
+    # Add Heading 1 with the character's name
+    doc.add_heading(character.name or "Unnamed Character", level=1)
+
+    # Iterate over the character fields dynamically
+    for field_name, value in vars(character).items():
+        if field_name == "name":
+            continue  # already used in Heading 1
+
+        # Format the field name nicely (e.g., backstory_spec -> Backstory Spec)
+        formatted_name = field_name.replace('_', ' ').title()
+        doc.add_heading(formatted_name, level=2)
+
+        # Handle the field content
+        if value:
+            if isinstance(value, list):
+                doc.add_paragraph(", ".join(str(item) for item in value))
+            else:
+                doc.add_paragraph(str(value))
+        else:
+            doc.add_paragraph("None/Empty")
+
+
+def add_all_characters_to_doc(doc: DocxDocument, characters):
+    for index, character in enumerate(characters):
+        add_character_to_doc(doc, character)
+        if index < len(characters) - 1:
+            doc.add_page_break()
+    
 
 def generate_word_docs(all_data: AllData) -> BytesIO:
     doc = Document()
@@ -16,7 +48,7 @@ def generate_word_docs(all_data: AllData) -> BytesIO:
     
     subtitle = doc.add_paragraph("Xouls - Beta Test", style='Subtitle')
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subtitle.add_run().add_break(WD_BREAK.PAGE)
+    doc.add_page_break()
     
     # TOC
     doc.add_heading("Table of Contents", 0)
@@ -46,19 +78,8 @@ def generate_word_docs(all_data: AllData) -> BytesIO:
     toc_run.add_break(WD_BREAK.PAGE)
     
     # Content
-    doc.add_heading("Test Heading 1", 1)
-    doc.add_paragraph("Heading 1 Level")
-    doc.add_heading("Test Heading 2", 2)
-    doc.add_paragraph("Heading 2 Level")
-    doc.add_heading("Test Heading 2", 2)
-    doc.add_paragraph("Heading 2 Level")
-    doc.add_heading("Test Heading 3", 3)
-    doc.add_paragraph("Heading 3 Level")
-    doc.add_heading("Test Heading 4", 4)
-    doc.add_paragraph("Heading 4 Level")
+    add_all_characters_to_doc(doc, all_data.characters)
 
-    # doc.add_paragraph(json.dumps(data, indent=2))
-    
     # Save document to buffer
     doc_buffer = BytesIO()
     doc.save(doc_buffer)
