@@ -1,5 +1,5 @@
 import streamlit as st
-from app.utils.custom_timestamp import get_timestamp
+from utils.custom_timestamp import get_timestamp
 
 
 # Function to log messages with timestamp

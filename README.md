@@ -22,11 +22,10 @@ You need to have Python installed. If you don't, install Python 3.
         venv\Scripts\activate
 
     Your terminal should now show ```(venv)``` before the prompt.
-5. ```cd app```
 6. Install dependencies:
 
-        pip install -r requirements.txt
+        pip install -r app/requirements.txt
 7. Run the app:
 
-        streamlit run main.py
+        streamlit run app/main.py
 8. Your browser should automatically open a new tab and load the app. If it doesn't, browse to the address shown in the terminal. 

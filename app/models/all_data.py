@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from app.models.character import Character
+from models.character import Character
 
 @dataclass
 class AllData:

@@ -2,12 +2,12 @@ import streamlit as st
 import zipfile
 import json
 
-from app.models.character import Character
-from app.models.all_data import AllData
-from app.utils.custom_logger import log
+from models.character import Character
+from models.all_data import AllData
+from utils.custom_logger import log
 
 # Parsers
-def parse_character_jsons(json_list) -> List[Character]:
+def parse_character_jsons(json_list) -> list[Character]:
     return [Character(**item) for item in json_list]
 
 def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:

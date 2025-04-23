@@ -6,9 +6,9 @@ from io import BytesIO
 from docx import Document
 from datetime import datetime
 
-from app.extract.json_extractor import extract_data
-from app.utils.custom_logger import log
-from app.utils.custom_timestamp import get_timestamp
+from extract.json_extractor import extract_data
+from utils.custom_logger import log
+from utils.custom_timestamp import get_timestamp
 
 # Session state for user options
 if "user_options_disabled" not in st.session_state:

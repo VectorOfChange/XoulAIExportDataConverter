@@ -1,6 +1,16 @@
-[theme]
-primaryColor = "#4CAF50"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#000000"
-font = "sans serif"
+# DARK THEME
+# [theme]
+# base = "dark"
+# primaryColor = "#8be9fd"       # Soft cyan (good for accents)
+# backgroundColor = "#1e1e2f"    # Very dark blue-gray
+# secondaryBackgroundColor = "#2d2d44"  # Slightly lighter for containers
+# textColor = "#f8f8f2"          # Soft white
+# font = "sans serif"
+
+# WHITE THEME
+# [theme]
+# primaryColor = "#4CAF50"
+# backgroundColor = "#ffffff"
+# secondaryBackgroundColor = "#f0f2f6"
+# textColor = "#000000"
+# font = "sans serif"
