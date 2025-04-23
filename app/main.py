@@ -3,6 +3,7 @@ import streamlit as st
 import zipfile
 from io import BytesIO
 
+from generate_docs.docs_generator import generate_docs
 from extract.json_extractor import extract_data
 from utils.custom_logger import log
 from utils.custom_timestamp import get_timestamp
@@ -77,8 +78,8 @@ st.header("Get Started!")
 
 st.subheader("Step 1: Choose Options", divider=True)
 
-include_markdown = st.checkbox("Include Markdown (.md) output", value=True, disabled=st.session_state.user_options_disabled)
-include_word = st.checkbox("Include Word (.docx) output", value=True, disabled=st.session_state.user_options_disabled)
+# include_markdown = st.checkbox("Include Markdown (.md) output", value=True, disabled=st.session_state.user_options_disabled)
+include_word = st.checkbox("Include Word (.docx) output", value=True, disabled=st.session_state.user_options_disabled, key="format_word")
 
 st.subheader("Step 2: Upload File", divider=True)
 uploaded_file = st.file_uploader("Upload your Xoul AI Data Export Zip file", type=["zip"])
@@ -98,6 +99,13 @@ if uploaded_file is not None:
         
         show_reset_button();
 
+        # get user options
+        selected_formats = [
+            key.replace("format_", "")                  # expression
+            for key, value in st.session_state.items()  # iterable
+            if key.startswith("format_") and value      # condition
+        ]
+
         st.subheader("Step 4: Wait for Processing to Finish", divider=True)        
         # Progress bar
         progress_bar = st.progress(0)
@@ -106,15 +114,8 @@ if uploaded_file is not None:
         try:
             zip_bytes = BytesIO(uploaded_file.read())
 
-            # Create a new in-memory zip to hold output files
-            output_zip_buffer = BytesIO()
-
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
                 all_data = extract_data(zip_file, on_progress=lambda p: progress_bar.progress(p))
-
-                st.subheader("Contents of Characters")
-                st.code(all_data)
-                
 
                 # file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
                 # st.session_state.total_files = len(file_list)
@@ -150,9 +151,9 @@ if uploaded_file is not None:
                 #                         doc.add_paragraph(json.dumps(data, indent=2))
                 #                         doc_buffer = BytesIO()
                 #                         doc.save(doc_buffer)
-                #                         doc_filename = name.replace(".json", ".docx")
-                #                         output_zip.writestr(doc_filename, doc_buffer.getvalue())
-                #                         log(f"Word doc added to ZIP: {doc_filename}")
+                                        # doc_filename = name.replace(".json", ".docx")
+                                        # output_zip.writestr(doc_filename, doc_buffer.getvalue())
+                                        # log(f"Word doc added to ZIP: {doc_filename}")
 
                 #             except Exception as e:
                 #                 error_msg = f"Error processing {name}: {e}"
@@ -172,22 +173,46 @@ if uploaded_file is not None:
                 status_text.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")
                 log(f"{st.session_state.total_files}/{st.session_state.total_files} files processed.")
 
-                # save results
-                st.session_state.output_zip = output_zip_buffer.getvalue()
-                st.session_state.processed = True
-                st.session_state.log_output = "\n".join(st.session_state.log_messages)
+                # # save results
+                # st.session_state.output_zip = output_zip_buffer.getvalue()
+                # st.session_state.processed = True
+                # st.session_state.log_output = "\n".join(st.session_state.log_messages)
 
-        except Exception as e:
-            st.error(f"❌ Failed to open ZIP: {e}")
-            log(f"Failed to open ZIP: {e}")
+        except Exception as unzip_e:
+            st.error(f"❌ Failed to open ZIP: {unzip_e}")
+            log(f"Failed to open ZIP: {unzip_e}")
+
+        # GENERATE AND SAVE DOCUMENTS
+        # TODO: split into two sections to get better logging and error reporting
+        try:
+            generated_doc_buffers = generate_docs(all_data, selected_formats)
+
+            # Open output ZIP
+            # Create a new in-memory zip to hold output files
+            output_zip_buffer = BytesIO()
+
+            with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip: 
+                for doc_buffer in generated_doc_buffers:
+                    doc_filename = "XoulAIConvertedData_BetaTest.docx"
+                    output_zip.writestr(doc_filename, doc_buffer.getvalue())
+                    log(f"Word doc added to ZIP: {doc_filename}")
+
+            # Finish writing to ZIP
+            output_zip_buffer.seek(0)
+
+        except Exception as generate_docs_e:
+            st.error(f"❌ Failed to generate or save documents: {generate_docs_e}")
+            log(f"Failed to generate or save documents: {generate_docs_e}")
+
+        # save results
+        st.session_state.output_zip = output_zip_buffer.getvalue()
+        st.session_state.processed = True
+        st.session_state.log_output = "\n".join(st.session_state.log_messages)
+
+        # TODO: fix status bar, make it accurate, make it accommodate session_state.processed properly 
 
     if st.session_state.processed:            
         show_reset_button();
-
-        st.subheader("Step 4: Wait for Processing to Finish", divider=True)        
-        # Progress bar
-        progress_bar = st.progress(100)
-        status_text = st.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")
 
         st.subheader("Step 5: Download Results", divider=True)
         
