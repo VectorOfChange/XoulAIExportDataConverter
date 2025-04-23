@@ -215,3 +215,5 @@ if uploaded_file is not None:
 
         # Show log output with timestamps in a scrollable code block
         st.code(st.session_state.log_output, language="bash")
+
+        st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
