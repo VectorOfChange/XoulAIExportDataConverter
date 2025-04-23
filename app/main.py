@@ -1,10 +1,7 @@
+# main.py
 import streamlit as st
 import zipfile
-import json
-import time
 from io import BytesIO
-from docx import Document
-from datetime import datetime
 
 from extract.json_extractor import extract_data
 from utils.custom_logger import log
@@ -113,9 +110,7 @@ if uploaded_file is not None:
             output_zip_buffer = BytesIO()
 
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
-                # NEW
                 all_data = extract_data(zip_file, on_progress=lambda p: progress_bar.progress(p))
-                # END NEW
 
                 st.subheader("Contents of Characters")
                 st.code(all_data)
