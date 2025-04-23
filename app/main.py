@@ -118,7 +118,8 @@ if uploaded_file is not None:
                 # END NEW
 
                 st.subheader("Contents of Characters")
-                st.json(all_data)
+                st.code(all_data)
+                
 
                 # file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
                 # st.session_state.total_files = len(file_list)

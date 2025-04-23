@@ -8,7 +8,7 @@ from utils.custom_logger import log
 
 # Parsers
 def parse_character_jsons(json_list) -> list[Character]:
-    return [Character(**item) for item in json_list]
+    return [Character.from_dict(item) for item in json_list]
 
 def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
     character_jsons = []
@@ -21,7 +21,7 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
 
     # A dictionary to map prefixes to their corresponding type lists and parsers
     type_parsers = {
-        'c': character_jsons, # character folder
+        'x': character_jsons, # character folder
         # 's': scenario_jsons, # scenario folder
         # 'chats_m': chats_multi_jsons, # chats_multi folder
         # 'chats_s': chats_single_jsons, # chats_single folder
