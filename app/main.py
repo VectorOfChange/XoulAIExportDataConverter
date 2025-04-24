@@ -67,6 +67,29 @@ def show_process_button():
         
         return process_button_internal
 
+# Function to update progress for JSON extraction
+def update_extraction_progress(completed_files: int) -> None:
+    """
+    Update the progress bar and status text with the number of completed files.
+
+    Args:
+        completed_files (int): The number of files that have been fully processed.
+            NOTE: If this function is called from within a loop using enumerate,
+            ensure you pass in (index + 1) since enumerate is zero-indexed and this
+            function expects a 1-based count of completed files.
+
+    Example:
+        for i, file in enumerate(files):
+            process(file)
+            update_extraction_progress(i + 1)
+
+    This function can also be called from non-loop contexts where an exact count of
+    completed files is tracked separately.
+    """
+    progress = completed_files / st.session_state.total_files
+    progress_bar.progress(progress)
+    status_text.text(f"Processed {completed_files} of {st.session_state.total_files} files...")
+
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
 # SIDEBAR
@@ -199,59 +222,15 @@ if uploaded_file is not None:
             zip_bytes = BytesIO(uploaded_file.read())
 
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
-                all_data = extract_data(zip_file, on_progress=lambda p: progress_bar.progress(p))
+                try:
+                    all_data = extract_data(zip_file, on_progress=update_extraction_progress)
 
-                # file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
-                # st.session_state.total_files = len(file_list)
-
-                # if st.session_state.total_files == 0:
-                #     st.warning("No JSON files found in the ZIP.")
-                # else:
-                #     st.subheader("📁 Contents of ZIP:")
-                #     for name in zip_file.namelist():
-                #         st.text(name)
-
-                #     # Open output ZIP
-                #     with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip:
-                #         for idx, name in enumerate(file_list, start=1):
-                #             try:
-                #                 with zip_file.open(name) as file:
-                #                     data = json.load(file)
-                #                     log(f"Loaded: {name}")
-
-                #                     st.markdown(f"### 📄 File: `{name}`")
-
-                #                     # Generate Markdown
-                #                     if include_markdown:
-                #                         markdown_output = json.dumps(data, indent=2)
-                #                         md_filename = name.replace(".json", ".md")
-                #                         output_zip.writestr(md_filename, markdown_output)
-                #                         log(f"Markdown added to ZIP: {md_filename}")
-
-                #                     # Generate Word
-                #                     if include_word:
-                #                         doc = Document()
-                #                         doc.add_heading("Generated Document", 0)
-                #                         doc.add_paragraph(json.dumps(data, indent=2))
-                #                         doc_buffer = BytesIO()
-                #                         doc.save(doc_buffer)
-                                        # doc_filename = name.replace(".json", ".docx")
-                                        # output_zip.writestr(doc_filename, doc_buffer.getvalue())
-                                        # log(f"Word doc added to ZIP: {doc_filename}")
-
-                #             except Exception as e:
-                #                 error_msg = f"Error processing {name}: {e}"
-                #                 log(error_msg)
-
-                #             # Update progress bar
-                #             progress = idx / st.session_state.total_files
-                #             progress_bar.progress(progress)
-                #             status_text.text(f"Processed {idx} of {st.session_state.total_files} files...")
-                #             # TODO: update status text and log to also indicate what function is happening
-
-                # # Finish writing to ZIP
-                # output_zip_buffer.seek(0)
-
+                except ValueError as extract_error:
+                    error_msg = f"Error during JSON Extraction: {extract_error}"
+                    log(error_msg)
+                    st.error(error_msg)
+                    # TODO: properly handle this error, stop processing, show reset button, disable download button
+                
                 # Done message
                 # TODO: add success and error files count
                 status_text.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")

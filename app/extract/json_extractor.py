@@ -39,11 +39,10 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
     st.session_state.total_files = len(file_list)
 
     if st.session_state.total_files == 0:
-        st.warning("No JSON files found in the ZIP.")
-        # TODO: make sure this case is handled, add logging, etc
+        raise ValueError("No JSON files were found in the ZIP archive.")
     else:
         # Iterate over the files and categorize them based on the name prefix
-        for name in file_list:
+        for idx, name in enumerate(file_list):
             try:
                 with zip_file.open(name) as file:
                     json_data = json.load(file)
@@ -57,7 +56,10 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
                 error_msg = f"Error processing {name}: {e}"
                 log(error_msg)
             
-            # TODO: log the found and categorized folders
+            if on_progress:
+                on_progress(idx + 1) # expects number of completed files, so adjust for zero-indexed loop index
+            
+    # TODO: log the found and categorized folders
 
     # Parse each category's data and return the AllData instance
     return AllData(
@@ -69,8 +71,3 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
         # xouls=parse_xoul_jsons(xoul_jsons),
         # assets=parse_asset_jsons(asset_jsons)
     )
-
-
-        # TODO: add progress bar back in
-        # if on_progress:
-        #     on_progress(i / 10)
