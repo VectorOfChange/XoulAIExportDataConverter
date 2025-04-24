@@ -88,7 +88,9 @@ def update_extraction_progress(completed_files: int) -> None:
     """
     progress = completed_files / st.session_state.total_files
     progress_bar.progress(progress)
-    status_text.text(f"Processed {completed_files} of {st.session_state.total_files} files...")
+    status_message = f"Extracted JSON from {completed_files} of {st.session_state.total_files} JSON files..."
+    status_text.text(status_message)
+    log(status_message)
 
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
@@ -100,48 +102,52 @@ with st.sidebar:
 
     with st.expander("Xoul AI Data Types"):
         st.markdown("Supported data types from the Xoul Data Export Zip File")
-        st.markdown("""| Data Type | Status |
-|----|----|
-| Xouls | ```beta``` | 
-| Personas | ```in progress``` | 
-| Scenarios | ```in progress``` | 
-| Lorebooks | ```in progress``` |
-| Single Chats | ```planned``` |
-| Multi Chats | ```planned``` |
-""")
+        st.markdown("""
+                    | Data Type | Status |
+                    |----|----|
+                    | Xouls | ```beta``` | 
+                    | Personas | ```in progress``` | 
+                    | Scenarios | ```in progress``` | 
+                    | Lorebooks | ```in progress``` |
+                    | Single Chats | ```planned``` |
+                    | Multi Chats | ```planned``` |
+                    """)
         
     with st.expander("Output File Types"):
-        st.markdown("""| File Type | Extension | Status |
-|----|----|----|
-| Word | .docx | ```beta``` | 
-| Markdown | .md | ```planned``` | 
-| Text | .txt | ```planned``` | 
-| JSON (for supported platforms) | ```planned``` |
-""")
+        st.markdown("""
+                    | File Type | Extension | Status |
+                    |----|----|----|
+                    | Word | .docx | ```beta``` | 
+                    | Markdown | .md | ```planned``` | 
+                    | Text | .txt | ```planned``` | 
+                    | JSON (for supported platforms) | ```planned``` |
+                    """)
         
     with st.expander("Data Conversion for Other Platforms"):
         st.markdown("This will adjust and/or convert the data from Xoul to make importing into other platforms easier.")
         st.markdown("JSON files for direct importing will be generated for  platforms that support it.")
-        st.markdown("""| Platform | Status | Supports JSON |
-|----|----|----|
-| Tavern Card (v2) | ```planned``` | ```yes``` | 
-| MyAI | ```planned``` | ```unknown``` | 
-| Wyvern | ```planned``` |  ```unknown``` |
-| CharSnap | ```planned``` |  ```unknown``` |
-| Sakura | ```planned``` | ```unknown``` |
-""")
+        st.markdown("""
+                    | Platform | Status | Supports JSON |
+                    |----|----|----|
+                    | Tavern Card (v2) | ```planned``` | ```yes``` | 
+                    | MyAI | ```planned``` | ```unknown``` | 
+                    | Wyvern | ```planned``` |  ```unknown``` |
+                    | CharSnap | ```planned``` |  ```unknown``` |
+                    | Sakura | ```planned``` | ```unknown``` |
+                    """)
         st.markdown("Want other platforms? Tell me by contacting me! Details below ⬇️")
         
     with st.expander("Legend"):
-        st.markdown("""| Status | Meaning |
-|----|----|
-| ```released``` | Available |
-| ```beta``` | Available (in testing). *May be broken* |  
-| ```in progress``` | Being coded now |  
-| ```planned``` | To be added soon |
-| ```future``` | To be added...eventually (if people want it) |  
-| ```Rejected``` | Will not be added |  
-""")
+        st.markdown("""
+                    | Status | Meaning |
+                    |----|----|
+                    | ```released``` | Available |
+                    | ```beta``` | Available (in testing). *May be broken* |  
+                    | ```in progress``` | Being coded now |  
+                    | ```planned``` | To be added soon |
+                    | ```future``` | To be added...eventually (if people want it) |  
+                    | ```Rejected``` | Will not be added |  
+                    """)
 
     st.subheader("Code and Contact")
     with st.expander("Source Code"):
@@ -175,8 +181,13 @@ st.subheader("🔒 Privacy")
 st.markdown("Your data stays **100% private**: none of your content is stored or logged. No human or machine can review your content.")
 
 st.subheader("⬅️ More Info is in the Sidebar")
-st.markdown("It contains information on current and future features, contact details, source code link, what to do about bugs or technical issues, and more. ")
+st.markdown("It contains information on current and future features, contact details, source code link, and more.")
 st.markdown("If you can't see the sidebar, click the ```>``` button at the top left of the page. This buttons changes to ```<``` when the sidebar is visible, and you can click it to hide the sidebar.")
+st.markdown("""
+            :red[Bugs? Errors? Technical issues?]  
+            :red[Missing Data? Weird computer code in the generated documents?]  
+            Report it and I'll fix it! See the ```Contact/Bugs``` section in the sidebar for details.
+            """)
 
 st.subheader("📱 Running on Phones")
 st.markdown("This isn't tested on phones, but is should work properly. Please tell me if you run into problems.")
