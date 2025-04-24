@@ -3,13 +3,14 @@ import streamlit as st
 import zipfile
 from io import BytesIO
 
+from globals.globals import APP_VERSION
 from generate_docs.docs_generator import generate_docs
 from extract.json_extractor import extract_data
 from utils.custom_logger import log
 from utils.custom_timestamp import get_timestamp
 
 # Constants
-APP_VERSION = "0.0.2"
+# moved to globals module
 
 # Session state for user options
 if "user_options_disabled" not in st.session_state:
@@ -267,20 +268,22 @@ if uploaded_file is not None:
 
             with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip: 
                 for doc_buffer in generated_doc_buffers:
-                    doc_filename = "XoulAIConvertedData_BetaTest.docx"
+                    doc_filename = "XoulAIBasicData_BetaTest.docx"
                     output_zip.writestr(doc_filename, doc_buffer.getvalue())
                     log(f"Word doc added to ZIP: {doc_filename}")
 
             # Finish writing to ZIP
             output_zip_buffer.seek(0)
 
+            # save results
+            st.session_state.output_zip = output_zip_buffer.getvalue()
+            st.session_state.processed = True
+
         except Exception as generate_docs_e:
             st.error(f"❌ Failed to generate or save documents: {generate_docs_e}")
             log(f"Failed to generate or save documents: {generate_docs_e}")
 
-        # save results
-        st.session_state.output_zip = output_zip_buffer.getvalue()
-        st.session_state.processed = True
+        # Generate log output
         st.session_state.log_output = "\n".join(st.session_state.log_messages)
 
         # TODO: fix status bar, make it accurate, make it accommodate session_state.processed properly 
@@ -292,7 +295,7 @@ if uploaded_file is not None:
         
         # Show final download
         output_download_timestamp = get_timestamp()
-        st.download_button("📦 Download All Output Files (ZIP)", st.session_state.output_zip, file_name=f"{output_download_timestamp}_converted_xoul_data.zip")
+        st.download_button("📦 Download All Output Files (ZIP)", st.session_state.output_zip, file_name=f"{output_download_timestamp}_ConvertedXoulAIData.zip")
         log("Final ZIP download ready.")
 
         # Activity log section

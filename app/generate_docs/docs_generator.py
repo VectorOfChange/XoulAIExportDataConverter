@@ -1,12 +1,12 @@
 # generate_docs/docs_generator.py
 
-from generate_docs.generate_word_docs import generate_word_docs
+from app.generate_docs.generate_xoulai_basic_word_doc import generate_xoulai_basic_word_doc
 from utils.custom_logger import log
 from models.all_data import AllData
 
 # formats dispatch dictionary
 format_generators = {
-    "word": generate_word_docs,
+    "word": generate_xoulai_basic_word_doc,
     #"txt": generate_txt,
     #"md": generate_md,
 }
