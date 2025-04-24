@@ -13,7 +13,7 @@ class LorebookSection:
 @dataclass
 class LorebookEmbedded:
     asset_type: Optional[str] = None
-    sections: List[LorebookSection]
+    sections: Optional[List[LorebookSection]] = field(default_factory=list)
 
     
 @dataclass

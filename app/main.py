@@ -3,7 +3,7 @@ import streamlit as st
 import zipfile
 from io import BytesIO
 
-from globals.globals import APP_VERSION
+from globals.globals import APP_VERSION, KNOWN_BUGS
 from generate_docs.docs_generator import generate_docs
 from extract.json_extractor import extract_data
 from utils.custom_logger import log
@@ -154,7 +154,7 @@ with st.sidebar:
     with st.expander("Source Code"):
         st.markdown("[Github Source Code Repo](https://github.com/VectorOfChange/XoulAIExportDataConverter)")
 
-    with st.expander("Contact/Bugs"):
+    with st.expander("Contact/Technical Issues"):
         st.markdown("The best way to contact me is to send me a discord DM: @vectorofchange (join the [Xoul Discord](https://discord.gg/xoul) to get access to DM me)")
         st.markdown("You can also tag me (@VectorOfChange) in the #alts channel in the Xoul Discord.")
         st.markdown("If you don't use Discord, you can start an Issue on Github on the source code. **Note:** Anything you put here will be public.")
@@ -162,6 +162,15 @@ with st.sidebar:
         st.subheader(":red[**Save the log**] so you can send it to me!")
         st.markdown("You can do this by using the button just above the log (at the bottom of the page) or copy/pasting it")
     
+    st.subheader("Known Bugs")
+    with st.expander("Known Bugs"):
+        if KNOWN_BUGS:
+            for bug in KNOWN_BUGS:
+                st.markdown("- " + bug)
+        else:
+            st.markdown("- No known bugs")
+
+
     st.subheader("More Info")
 
     with st.expander("Privacy Info"):

@@ -1,6 +1,7 @@
 # generate_docs/generate_word_doc.py
 
 from io import BytesIO
+from os import path
 from docx import Document
 from docx.document import Document as DocxDocument
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
@@ -11,7 +12,7 @@ from models.persona import Persona, PersonaPromptSpec
 from models.all_data import AllData
 from models.character import Character
 from models.scenario import Scenario, ScenarioPromptSpec, ScenarioObjective
-from globals.globals import APP_VERSION, NO_DATA_DESCRIPTION
+from globals.globals import APP_VERSION, KNOWN_BUGS, NO_DATA_DESCRIPTION
 
 # TODO: How to handle \n in data? other escaped like \"?
 
@@ -36,7 +37,7 @@ def add_character_to_doc(doc: DocxDocument, character: Character):
             else:
                 doc.add_paragraph(str(value))
         else:
-            doc.add_paragraph(f"{NO_DATA_DESCRIPTION}")
+            doc.add_paragraph(NO_DATA_DESCRIPTION)
 
 def add_all_characters_to_doc(doc: DocxDocument, characters):
     doc.add_heading("Xouls", level=1)
@@ -60,12 +61,12 @@ def add_scenario_to_doc(doc: DocxDocument, scenario: Scenario):
             doc.add_heading("Prompt Spec", level=3)
             for sub_field, sub_value in vars(value).items():
                 doc.add_heading(sub_field.replace('_', ' ').title(), level=4)
-                doc.add_paragraph(str(sub_value) if sub_value else f"{NO_DATA_DESCRIPTION}")
+                doc.add_paragraph(str(sub_value) if sub_value else NO_DATA_DESCRIPTION)
 
         elif isinstance(value, ScenarioObjective):
             doc.add_heading("Objective", level=3)
             doc.add_heading("Description", level=4)
-            doc.add_paragraph(value.description or f"{NO_DATA_DESCRIPTION}")
+            doc.add_paragraph(value.description or NO_DATA_DESCRIPTION)
             if value.meters:
                 doc.add_heading("Meters", level=4)
                 for meter in value.meters:
@@ -83,7 +84,7 @@ def add_scenario_to_doc(doc: DocxDocument, scenario: Scenario):
                 else:
                     doc.add_paragraph(str(value))
             else:
-                doc.add_paragraph(f"{NO_DATA_DESCRIPTION}")
+                doc.add_paragraph(NO_DATA_DESCRIPTION)
 
 def add_all_scenarios_to_doc(doc: DocxDocument, scenarios):
     doc.add_heading("Scenarios", level=1)
@@ -108,7 +109,7 @@ def add_persona_to_doc(doc: DocxDocument, persona: Persona):
             doc.add_heading("Prompt Spec", level=3)
             for sub_field, sub_value in vars(value).items():
                 doc.add_heading(sub_field.replace('_', ' ').title(), level=4)
-                doc.add_paragraph(str(sub_value) if sub_value else f"{NO_DATA_DESCRIPTION}")
+                doc.add_paragraph(str(sub_value) if sub_value else NO_DATA_DESCRIPTION)
 
         else:
             doc.add_heading(formatted_name, level=3)
@@ -120,7 +121,7 @@ def add_persona_to_doc(doc: DocxDocument, persona: Persona):
                 else:
                     doc.add_paragraph(str(value))
             else:
-                doc.add_paragraph(f"{NO_DATA_DESCRIPTION}")
+                doc.add_paragraph(NO_DATA_DESCRIPTION)
 
 def add_all_personas_to_doc(doc: DocxDocument, personas):
     doc.add_heading("Personas", level=1)
@@ -133,7 +134,7 @@ def add_all_personas_to_doc(doc: DocxDocument, personas):
 
 # Lorebook Helpers
 def add_lorebook_section_to_doc(doc: DocxDocument, section):
-    doc.add_heading(section.name or "Unnamed Section", level=4)
+    doc.add_heading(section.name or "Unnamed Section", level=5)
 
     # Iterate over the character fields dynamically
     for field_name, value in vars(section).items():
@@ -142,7 +143,7 @@ def add_lorebook_section_to_doc(doc: DocxDocument, section):
 
         # Format the field name nicely (e.g., backstory_spec -> Backstory Spec)
         formatted_name = field_name.replace('_', ' ').title()
-        doc.add_heading(formatted_name, level=5)
+        doc.add_heading(formatted_name, level=6)
 
         # Handle the field content
         if value:
@@ -151,7 +152,7 @@ def add_lorebook_section_to_doc(doc: DocxDocument, section):
             else:
                 doc.add_paragraph(str(value))
         else:
-            doc.add_paragraph(f"{NO_DATA_DESCRIPTION}")
+            doc.add_paragraph(NO_DATA_DESCRIPTION)
 
 def add_lorebook_to_doc(doc: DocxDocument, lorebook):
     doc.add_heading(lorebook.name or "Unnamed Lorebook", level=2)
@@ -163,14 +164,15 @@ def add_lorebook_to_doc(doc: DocxDocument, lorebook):
         formatted_name = field_name.replace('_', ' ').title()
 
         if field_name == "embedded" and value:
-            doc.add_heading("embedded", level=3)
-            doc.add_paragraph(f"asset type: {value.asset_type or 'None'}")
+            doc.add_heading("Embedded", level=3)
+            doc.add_heading("Asset Type", level=4)
+            doc.add_paragraph(value.asset_type or NO_DATA_DESCRIPTION)
             if value.sections:
-                doc.add_heading("sections", level=3)
+                doc.add_heading("Sections", level=4)
                 for section in value.sections:
                     add_lorebook_section_to_doc(doc, section)
             else:
-                doc.add_paragraph(f"{NO_DATA_DESCRIPTION}")
+                doc.add_paragraph(NO_DATA_DESCRIPTION)
         else:
             doc.add_heading(formatted_name, level=3)
             if value:
@@ -179,10 +181,10 @@ def add_lorebook_to_doc(doc: DocxDocument, lorebook):
                 else:
                     doc.add_paragraph(str(value))
             else:
-                doc.add_paragraph(f"{NO_DATA_DESCRIPTION}")
+                doc.add_paragraph(NO_DATA_DESCRIPTION)
 
 
-def add_all_lorebooks_to_doc(doc: DocxDocument, lorebooks: List):
+def add_all_lorebooks_to_doc(doc: DocxDocument, lorebooks: list):
     doc.add_heading("Lorebooks", level=1)
     if lorebooks:
         for index, lorebook in enumerate(lorebooks):
@@ -207,7 +209,7 @@ def add_info_section_to_doc(doc: DocxDocument):
     # bugs section
     doc.add_heading("Bugs and Technical Issues", level=2)
     p = doc.add_paragraph("Bugs? Errors? Technical issues?")
-    p.add_run().add_break
+    p.add_run().add_break()
     p.add_run("Missing Data? Weird computer code in the generated documents?")
     doc.add_paragraph("Report it and I'll fix it! My contact information is in the Contact section. Remember to save the log from the website if possible.")
     
@@ -225,15 +227,31 @@ def add_info_section_to_doc(doc: DocxDocument):
     doc.add_heading("Source Code")
     doc.add_paragraph("Github Source Code Repo: https://github.com/VectorOfChange/XoulAIExportDataConverter")
 
-    # A[[]] Version
+    # App Version
     doc.add_heading("App Version")
     doc.add_paragraph(f"App Version: {APP_VERSION}")
 
     doc.add_page_break()
 
+def add_known_bugs_section_to_doc(doc: DocxDocument):
+    doc.add_heading("Known Bugs and Issues", level=1)
+    
+    doc.add_paragraph(f"Known bugs and issues (app version: {APP_VERSION}):")
+    
+    p = doc.add_paragraph(style='List Bullet')
+
+    if KNOWN_BUGS:
+        for bug in KNOWN_BUGS:
+            r = p.add_run(bug)
+            r.add_break()
+    else:
+        p.add_run("No Known Bugs")
+    
+    doc.add_page_break()
+
 # Generate Doc
 def generate_xoulai_basic_word_doc(all_data: AllData) -> BytesIO:
-    doc = Document()
+    doc = Document(path.join('app', 'assets', 'numbered_heading_template.docx'))
 
     # Title Page
     title = doc.add_paragraph("Converted Xoul AI Data", style='Title')
@@ -241,7 +259,7 @@ def generate_xoulai_basic_word_doc(all_data: AllData) -> BytesIO:
     
     subtitle = doc.add_paragraph("All Data Except Chat Histories", style='Subtitle')
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subtitle.add_run().add_break
+    subtitle.add_run().add_break()
     subtitle.add_run("Formatted for Platform: Xoul AI (unmodified)")
     
     beta_tag = doc.add_paragraph()
@@ -263,7 +281,7 @@ def generate_xoulai_basic_word_doc(all_data: AllData) -> BytesIO:
     fldChar2 = OxmlElement('w:fldChar')
     fldChar2.set(qn('w:fldCharType'), 'separate')
     fldChar3 = OxmlElement('w:t')
-    fldChar3.text = "Right-click on this text, then click Update Field to show the  Table of Contents."
+    fldChar3.text = "Right-click on this text, then click Update Field to show the Table of Contents."
     fldChar2.append(fldChar3)
 
     fldChar4 = OxmlElement('w:fldChar')
@@ -282,6 +300,7 @@ def generate_xoulai_basic_word_doc(all_data: AllData) -> BytesIO:
     add_all_characters_to_doc(doc, all_data.characters)
     add_all_scenarios_to_doc(doc, all_data.scenarios)
     add_all_personas_to_doc(doc, all_data.personas)
+    add_all_lorebooks_to_doc(doc, all_data.lorebooks)
 
     # Save document to buffer
     doc_buffer = BytesIO()
