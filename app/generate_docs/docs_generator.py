@@ -1,6 +1,6 @@
 # generate_docs/docs_generator.py
 
-from app.generate_docs.generate_xoulai_basic_word_doc import generate_xoulai_basic_word_doc
+from generate_docs.generate_xoulai_basic_word_doc import generate_xoulai_basic_word_doc
 from utils.custom_logger import log
 from models.all_data import AllData
 
