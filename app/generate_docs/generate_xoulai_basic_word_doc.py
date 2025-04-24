@@ -109,8 +109,13 @@ def add_persona_to_doc(doc: DocxDocument, persona: Persona):
 
         else:
             doc.add_heading(formatted_name, level=3)
+            
+            # Handle the field content
             if value:
-                doc.add_paragraph(str(value))
+                if isinstance(value, list):
+                    doc.add_paragraph(", ".join(str(item) for item in value))
+                else:
+                    doc.add_paragraph(str(value))
             else:
                 doc.add_paragraph("None/Empty")
 
