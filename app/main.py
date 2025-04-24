@@ -8,6 +8,9 @@ from extract.json_extractor import extract_data
 from utils.custom_logger import log
 from utils.custom_timestamp import get_timestamp
 
+# Constants
+APP_VERSION = "0.0.2"
+
 # Session state for user options
 if "user_options_disabled" not in st.session_state:
     st.session_state.user_options_disabled = False
@@ -66,13 +69,94 @@ def show_process_button():
 
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
+# SIDEBAR
+with st.sidebar:
+    st.title("About")
+
+    st.subheader("Supported Features")
+
+    with st.expander("Xoul AI Data Types"):
+        st.markdown("Supported data types from the Xoul Data Export Zip File")
+        st.markdown("""| Data Type | Status |
+|----|----|
+| Xouls | ```beta``` | 
+| Personas | ```in progress``` | 
+| Scenarios | ```in progress``` | 
+| Lorebooks | ```in progress``` |
+| Single Chats | ```planned``` |
+| Multi Chats | ```planned``` |
+""")
+        
+    with st.expander("Output File Types"):
+        st.markdown("""| File Type | Extension | Status |
+|----|----|----|
+| Word | .docx | ```beta``` | 
+| Markdown | .md | ```planned``` | 
+| Text | .txt | ```planned``` | 
+| JSON (for supported platforms) | ```planned``` |
+""")
+        
+    with st.expander("Data Conversion for Other Platforms"):
+        st.markdown("This will adjust and/or convert the data from Xoul to make importing into other platforms easier.")
+        st.markdown("JSON files for direct importing will be generated for  platforms that support it.")
+        st.markdown("""| Platform | Status | Supports JSON |
+|----|----|----|
+| Tavern Card (v2) | ```planned``` | ```yes``` | 
+| MyAI | ```planned``` | ```unknown``` | 
+| Wyvern | ```planned``` |  ```unknown``` |
+| CharSnap | ```planned``` |  ```unknown``` |
+| Sakura | ```planned``` | ```unknown``` |
+""")
+        st.markdown("Want other platforms? Tell me by contacting me! Details below ⬇️")
+        
+    with st.expander("Legend"):
+        st.markdown("""| Status | Meaning |
+|----|----|
+| ```released``` | Available |
+| ```beta``` | Available (in testing). *May be broken* |  
+| ```in progress``` | Being coded now |  
+| ```planned``` | To be added soon |
+| ```future``` | To be added...eventually (if people want it) |  
+| ```Rejected``` | Will not be added |  
+""")
+
+    st.subheader("Code and Contact")
+    with st.expander("Source Code"):
+        st.markdown("[Github Source Code Repo](https://github.com/VectorOfChange/XoulAIExportDataConverter)")
+
+    with st.expander("Contact/Bugs"):
+        st.markdown("The best way to contact me is to send me a discord DM: @vectorofchange (join the [Xoul Discord](https://discord.gg/xoul) to get access to DM me)")
+        st.markdown("You can also tag me (@VectorOfChange) in the #alts channel in the Xoul Discord.")
+        st.markdown("If you don't use Discord, you can start an Issue on Github on the source code. **Note:** Anything you put here will be public.")
+        st.header(":red[Technical Issue or Bug?]")
+        st.subheader(":red[**Save the log**] so you can send it to me!")
+        st.markdown("You can do this by using the button just above the log (at the bottom of the page) or copy/pasting it")
+    
+    st.subheader("More Info")
+
+    with st.expander("Privacy Info"):
+        st.markdown("Everything is 100% private. All data is kept in memory on the server, nothing is ever written to disk.")
+        st.markdown("All of your data is permanently deleted from the server memory as soon as you close or refresh the webpage.")
+        st.markdown("No human or machine can ever access or review your data.")
+
+    with st.expander("App Version"):
+        st.markdown(f"Version: ```{APP_VERSION}```") # TODO: Add app version to log
+
+# MAIN PAGE
 st.title("📄 Xoul AI Data Converter")
 
 st.subheader("About")
 st.markdown("This tool converts your Xoul AI exported data to other formats. This makes it easier to use your data on other platforms.")
 
-st.subheader("Privacy")
+st.subheader("🔒 Privacy")
 st.markdown("Your data stays **100% private**: none of your content is stored or logged. No human or machine can review your content.")
+
+st.subheader("⬅️ More Info is in the Sidebar")
+st.markdown("It contains information on current and future features, contact details, source code link, what to do about bugs or technical issues, and more. ")
+st.markdown("If you can't see the sidebar, click the ```>``` button at the top left of the page. This buttons changes to ```<``` when the sidebar is visible, and you can click it to hide the sidebar.")
+
+st.subheader("📱 Running on Phones")
+st.markdown("This isn't tested on phones, but is should work properly. Please tell me if you run into problems.")
 
 st.header("Get Started!")
 
