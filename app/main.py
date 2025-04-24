@@ -107,11 +107,11 @@ with st.sidebar:
                     | Data Type | Status |
                     |----|----|
                     | Xouls | ```beta``` | 
-                    | Personas | ```in progress``` | 
-                    | Scenarios | ```in progress``` | 
-                    | Lorebooks | ```in progress``` |
-                    | Single Chats | ```planned``` |
-                    | Multi Chats | ```planned``` |
+                    | Personas | ```beta``` | 
+                    | Scenarios | ```beta``` | 
+                    | Lorebooks | ```beta``` |
+                    | Single Chats | ```in progress``` |
+                    | Multi Chats | ```in progress``` |
                     """)
         
     with st.expander("Output File Types"):
