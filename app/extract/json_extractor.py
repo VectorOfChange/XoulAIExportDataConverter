@@ -6,6 +6,7 @@ import json
 from models.persona import Persona
 from models.scenario import Scenario
 from models.character import Character
+from models.lorebook import Lorebook
 from models.all_data import AllData
 from utils.custom_logger import log
 
@@ -19,13 +20,16 @@ def parse_scenario_jsons(json_list) -> list[Scenario]:
 def parse_persona_jsons(json_list) -> list[Persona]:
     return [Persona.from_dict(item) for item in json_list]
 
+def parse_lorebook_jsons(json_list) -> list[Lorebook]:
+    return [Lorebook.from_dict(item) for item in json_list]
+
 def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
     character_jsons = []
     scenario_jsons = []
     # chats_multi_jsons = []
     # chats_single_jsons = []
     persona_jsons = []
-    # asset_jsons = []
+    lorebook_jsons = []
 
     # A dictionary to map prefixes to their corresponding type lists and parsers
     type_parsers = {
@@ -34,7 +38,7 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
         # 'chats_m': chats_multi_jsons, # chats_multi folder
         # 'chats_s': chats_single_jsons, # chats_single folder
         'p': persona_jsons, # persona folder
-        # 'a': asset_jsons, # asset folder
+        'a': lorebook_jsons, # asset folder
     }
 
     file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
@@ -70,5 +74,5 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
         # chats_multi=parse_chat_multi_jsons(chat_multi_jsons),
         # chats_single=parse_chat_single_jsons(chat_single_jsons),
         personas=parse_persona_jsons(persona_jsons),
-        # assets=parse_asset_jsons(asset_jsons)
+        lorebooks=parse_lorebook_jsons(lorebook_jsons)
     )

@@ -1,0 +1,48 @@
+from dataclasses import dataclass, field, fields
+from typing import Optional, List
+
+
+@dataclass
+class LorebookSection:
+    lore_type: Optional[str] = None
+    name: Optional[str] = None
+    keywords: Optional[List[str]] = field(default_factory=list)
+    text: Optional[str] = None
+
+
+@dataclass
+class LorebookEmbedded:
+    asset_type: Optional[str] = None
+    sections: List[LorebookSection]
+
+    
+@dataclass
+class Lorebook:
+    name: Optional[str] = None
+    description: Optional[str] = None
+    social_tags: Optional[List[str]] = None
+    visibility: Optional[str] = None
+    posted_to_xoul: Optional[str] = None
+    posted_to_scenario: Optional[str] = None
+    slug: Optional[str] = None
+    asset_type: Optional[str] = None
+    embedded: Optional[LorebookEmbedded] = None
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        valid_keys = {f.name for f in fields(cls)}
+        filtered_data = {}
+
+        for key in data:
+            if key in valid_keys:
+                if key == "embedded" and isinstance(data[key], dict):
+                    sections_data = data[key].get("sections", [])
+                    sections = [LorebookSection(**s) for s in sections_data if isinstance(s, dict)]
+                    filtered_data[key] = LorebookEmbedded(
+                        asset_type=data[key].get("asset_type"), 
+                        sections=sections
+                    )
+                else:
+                    filtered_data[key] = data[key]
+
+        return cls(**filtered_data)
