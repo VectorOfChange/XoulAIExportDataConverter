@@ -355,7 +355,20 @@ if uploaded_file is not None:
         # Show log output with timestamps in a scrollable code block
         st.code(st.session_state.log_output, language="bash")
 
-        st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
+st.subheader("Changelog")
+st.markdown("""
+            * Version ```0.0.1```:
+                * FEATURE: Initial Version
+                * FEATURE: Process Xouls into Word Document
+            * Version ```0.0.2```:
+                * FEATURE: Add processing Personas, Scenarios, and Lorebooks
+                * GUI: Significant updates including sidebar
+            * Version ```0.0.3```:
+                * FEATURE: Make options use selectable
+                * Refactor backend to prepare for expansion
+            """)
+
+st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
 
 # TODO: add changelog 
 # TODO: Add JSON explainer
