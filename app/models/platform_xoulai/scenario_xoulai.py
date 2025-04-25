@@ -26,6 +26,7 @@ class ScenarioObjectiveXoulAI:
 
 @dataclass
 class ScenarioXoulAI:
+    source_filename: Optional[str] = None
     name: Optional[str] = None
     social_tags: Optional[list[str]] = None
     slug: Optional[str] = None

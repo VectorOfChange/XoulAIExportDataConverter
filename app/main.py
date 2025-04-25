@@ -3,6 +3,7 @@ import streamlit as st
 import zipfile
 from io import BytesIO
 
+from dtos.user_options import UserOptions
 from globals.globals import APP_VERSION, KNOWN_BUGS
 from doc_generation.doc_generation_manager import generate_all_docs
 from extract.json_extractor import extract_data
@@ -207,8 +208,51 @@ st.header("Get Started!")
 
 st.subheader("Step 1: Choose Options", divider=True)
 
-# include_markdown = st.checkbox("Include Markdown (.md) output", value=True, disabled=st.session_state.user_options_disabled)
-include_word = st.checkbox("Include Word (.docx) output", value=True, disabled=st.session_state.user_options_disabled, key="format_word")
+with st.expander("Xoul Data to Process", expanded=True):
+    st.markdown("Choose the types of Xoul data you want to process.")
+    
+    user_option_content_col1, user_option_content_col2 = st.columns(2)
+
+    with user_option_content_col1:
+        st.checkbox("Xouls", value=True, disabled=st.session_state.user_options_disabled, key="app_content_characters")
+        st.checkbox("Personas", value=True, disabled=st.session_state.user_options_disabled, key="app_content_personas")
+        st.checkbox("Scenarios", value=True, disabled=st.session_state.user_options_disabled, key="app_content_scenarios")
+    
+    with user_option_content_col2:
+        # st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single")
+        # st.checkbox("Group Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_group")
+        st.checkbox("Lorebooks", value=True, disabled=st.session_state.user_options_disabled, key="app_content_lorebooks")
+
+with st.expander("Platform Specific Adjustment", expanded=True):
+    st.markdown("Choose the platforms you want to generate data for. Each selection will generate a set of files optimized for use with the platform.")
+    
+    user_option_platform_col1, user_option_platform_col2 = st.columns(2)
+
+    with user_option_platform_col1:
+        st.checkbox("Xoul AI (original data)", value=True, disabled=st.session_state.user_options_disabled, key="app_platform_xoulai")
+        # st.checkbox("MyAI", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_myai")
+    
+    # with user_option_platform_col2:
+    #     st.checkbox("Wyvern", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_wyvern")
+    #     st.checkbox("CharSnap", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_charsnap")
+    #     st.checkbox("Sakura", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_sakura")
+    
+    # st.markdown("* Tavern Card v2 JSON is a type of JSON that is accepted at many sites.") # TODO: create Tavern Card v2 FAQ
+    
+with st.expander("File Output Types", expanded=True):
+    st.markdown("Choose the types of files you want to generate.")
+    
+    user_option_format_col1, user_option_format_col2 = st.columns(2)
+
+    with user_option_format_col1:
+        st.checkbox("Word (.docx)", value=True, disabled=st.session_state.user_options_disabled, key="app_format_word")
+    #     st.checkbox("Text (.txt)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_txt")
+    
+    # with user_option_format_col2:
+    #     st.checkbox("Markdown (.md)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_md")
+    #     st.checkbox("Platform Specific JSON (.json)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_json")
+    
+    # st.markdown("* Platform Specific JSON files are used by specific platforms and not interchangeable with other platforms. This will only be generated for platforms that support JSON importing.") # TODO: Create JSON file FAQ
 
 st.subheader("Step 2: Upload File", divider=True)
 uploaded_file = st.file_uploader("Upload your Xoul AI Data Export Zip file", type=["zip"])
@@ -226,14 +270,11 @@ if uploaded_file is not None:
 
     if process_button and not st.session_state.processed:
         
-        show_reset_button();
+        show_reset_button()
 
         # get user options
-        selected_formats = [
-            key.replace("format_", "")                  # expression
-            for key, value in st.session_state.items()  # iterable
-            if key.startswith("format_") and value      # condition
-        ]
+
+        user_options = UserOptions.from_session_state()
 
         st.subheader("Step 4: Wait for Processing to Finish", divider=True)        
         # Progress bar
@@ -258,11 +299,6 @@ if uploaded_file is not None:
                 status_text.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")
                 log(f"{st.session_state.total_files}/{st.session_state.total_files} files processed.")
 
-                # # save results
-                # st.session_state.output_zip = output_zip_buffer.getvalue()
-                # st.session_state.processed = True
-                # st.session_state.log_output = "\n".join(st.session_state.log_messages)
-
         except Exception as unzip_e:
             st.error(f"❌ Failed to open ZIP: {unzip_e}")
             log(f"Failed to open ZIP: {unzip_e}")
@@ -270,7 +306,7 @@ if uploaded_file is not None:
         # GENERATE AND SAVE DOCUMENTS
         # TODO: split into two sections to get better logging and error reporting
         try:
-            generated_doc_buffers = generate_all_docs(all_data, selected_formats)
+            generated_doc_buffers = generate_all_docs(all_data, user_options)
 
             # Open output ZIP
             # Create a new in-memory zip to hold output files
@@ -278,9 +314,9 @@ if uploaded_file is not None:
 
             with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip: 
                 for doc_buffer in generated_doc_buffers:
-                    doc_filename = "XoulAIBasicData_BetaTest.docx"
-                    output_zip.writestr(doc_filename, doc_buffer.getvalue())
-                    log(f"Word doc added to ZIP: {doc_filename}")
+                    doc_filename = doc_buffer.filename
+                    output_zip.writestr(doc_filename, doc_buffer.buffer.getvalue())
+                    log(f"Document added to ZIP: {doc_filename}")
 
             # Finish writing to ZIP
             output_zip_buffer.seek(0)
@@ -320,3 +356,8 @@ if uploaded_file is not None:
         st.code(st.session_state.log_output, language="bash")
 
         st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
+
+# TODO: add changelog 
+# TODO: Add JSON explainer
+# TODO: Add platform support table
+# TODO: Add jump to links and jump back to to top links

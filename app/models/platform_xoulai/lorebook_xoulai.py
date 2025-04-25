@@ -19,6 +19,7 @@ class LorebookEmbeddedXoulAI:
     
 @dataclass
 class LorebookXoulAI:
+    source_filename: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
     social_tags: Optional[List[str]] = None

@@ -3,11 +3,12 @@ import streamlit as st
 import zipfile
 import json
 
+from models.platform_xoulai.all_data_xoulai import AllDataXoulAI
 from models.platform_xoulai.persona_xoulai import PersonaXoulAI
 from models.platform_xoulai.scenario_xoulai import ScenarioXoulAI
 from models.platform_xoulai.character_xoulai import CharacterXoulAI
 from models.platform_xoulai.lorebook_xoulai import LorebookXoulAI
-from models.all_json_data import AllJsonData
+from models.all_data import AllData
 from utils.custom_logger import log
 
 # Parsers
@@ -23,7 +24,7 @@ def parse_persona_jsons(json_list) -> list[PersonaXoulAI]:
 def parse_lorebook_jsons(json_list) -> list[LorebookXoulAI]:
     return [LorebookXoulAI.from_dict(item) for item in json_list]
 
-def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllJsonData:
+def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
     character_jsons = []
     scenario_jsons = []
     # chats_multi_jsons = []
@@ -52,6 +53,7 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllJsonData:
             try:
                 with zip_file.open(name) as file:
                     json_data = json.load(file)
+                    json_data["source_filename"] = name
                     
                     for prefix, type_list in type_parsers.items():
                         if file.name.startswith(prefix):
@@ -67,12 +69,13 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllJsonData:
             
     # TODO: log the found and categorized folders
 
-    # Parse each category's data and return the AllData instance
-    return AllJsonData(
+    xoulai_data = AllDataXoulAI(
         characters=parse_character_jsons(character_jsons),
         scenarios=parse_scenario_jsons(scenario_jsons),
         # chats_multi=parse_chat_multi_jsons(chat_multi_jsons),
         # chats_single=parse_chat_single_jsons(chat_single_jsons),
         personas=parse_persona_jsons(persona_jsons),
-        lorebooks=parse_lorebook_jsons(lorebook_jsons)
-    )
+        lorebooks=parse_lorebook_jsons(lorebook_jsons))
+
+    # Parse each category's data and return the AllData instance
+    return AllData(xoulai_data)

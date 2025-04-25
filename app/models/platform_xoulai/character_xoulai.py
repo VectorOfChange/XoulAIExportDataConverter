@@ -4,6 +4,7 @@ from typing import Optional, List
 
 @dataclass
 class CharacterXoulAI:
+    source_filename: Optional[str] = None
     name: Optional[str] = None
     gender: Optional[str] = None
     age: Optional[int] = None
