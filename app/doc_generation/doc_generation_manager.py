@@ -1,18 +1,17 @@
-# generate_docs/docs_generator.py
-
-from generate_docs.generate_xoulai_basic_word_doc import generate_xoulai_basic_word_doc
+# doc_generation/docs_generation_manager.py
+from doc_generation.type_group_generators.nonchat_word_doc_generator import generate_nonchat_word_docs
 from utils.custom_logger import log
-from models.all_data import AllData
+from models.all_json_data import AllJsonData
 
 # formats dispatch dictionary
 format_generators = {
-    "word": generate_xoulai_basic_word_doc,
+    "word": generate_nonchat_word_docs,
     #"txt": generate_txt,
     #"md": generate_md,
 }
 
 
-def generate_docs(all_data: AllData, selected_formats) -> list:
+def generate_all_docs(all_data: AllJsonData, selected_formats) -> list:
     doc_buffers = []
     
     for fmt in selected_formats:

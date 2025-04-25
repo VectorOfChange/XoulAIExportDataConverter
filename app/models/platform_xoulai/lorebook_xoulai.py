@@ -1,9 +1,10 @@
+# models/platform_xoulai/lorebook_xoulai.py
 from dataclasses import dataclass, field, fields
 from typing import Optional, List
 
 
 @dataclass
-class LorebookSection:
+class LorebookSectionXoulAI:
     lore_type: Optional[str] = None
     name: Optional[str] = None
     keywords: Optional[List[str]] = field(default_factory=list)
@@ -11,13 +12,13 @@ class LorebookSection:
 
 
 @dataclass
-class LorebookEmbedded:
+class LorebookEmbeddedXoulAI:
     asset_type: Optional[str] = None
-    sections: Optional[List[LorebookSection]] = field(default_factory=list)
+    sections: Optional[List[LorebookSectionXoulAI]] = field(default_factory=list)
 
     
 @dataclass
-class Lorebook:
+class LorebookXoulAI:
     name: Optional[str] = None
     description: Optional[str] = None
     social_tags: Optional[List[str]] = None
@@ -26,7 +27,7 @@ class Lorebook:
     posted_to_scenario: Optional[str] = None
     slug: Optional[str] = None
     asset_type: Optional[str] = None
-    embedded: Optional[LorebookEmbedded] = None
+    embedded: Optional[LorebookEmbeddedXoulAI] = None
 
     @classmethod
     def from_dict(cls, data: dict):
@@ -37,8 +38,8 @@ class Lorebook:
             if key in valid_keys:
                 if key == "embedded" and isinstance(data[key], dict):
                     sections_data = data[key].get("sections", [])
-                    sections = [LorebookSection(**s) for s in sections_data if isinstance(s, dict)]
-                    filtered_data[key] = LorebookEmbedded(
+                    sections = [LorebookSectionXoulAI(**s) for s in sections_data if isinstance(s, dict)]
+                    filtered_data[key] = LorebookEmbeddedXoulAI(
                         asset_type=data[key].get("asset_type"), 
                         sections=sections
                     )

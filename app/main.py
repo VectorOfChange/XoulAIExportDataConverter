@@ -4,7 +4,7 @@ import zipfile
 from io import BytesIO
 
 from globals.globals import APP_VERSION, KNOWN_BUGS
-from generate_docs.docs_generator import generate_docs
+from doc_generation.doc_generation_manager import generate_all_docs
 from extract.json_extractor import extract_data
 from utils.custom_logger import log
 from utils.custom_timestamp import get_timestamp
@@ -111,7 +111,7 @@ with st.sidebar:
                     | Scenarios | ```beta``` | 
                     | Lorebooks | ```beta``` |
                     | Single Chats | ```in progress``` |
-                    | Multi Chats | ```in progress``` |
+                    | Group Chats | ```in progress``` |
                     """)
         
     with st.expander("Output File Types"):
@@ -201,6 +201,7 @@ st.markdown("""
 
 st.subheader("📱 Running on Phones")
 st.markdown("This isn't tested on phones, but is should work properly. Please tell me if you run into problems.")
+st.markdown("The file upload may not work on mobile Chrome (or Chrome based browsers like Brave). Workaround: use the ```view desktop page``` option of your mobile browser")
 
 st.header("Get Started!")
 
@@ -269,7 +270,7 @@ if uploaded_file is not None:
         # GENERATE AND SAVE DOCUMENTS
         # TODO: split into two sections to get better logging and error reporting
         try:
-            generated_doc_buffers = generate_docs(all_data, selected_formats)
+            generated_doc_buffers = generate_all_docs(all_data, selected_formats)
 
             # Open output ZIP
             # Create a new in-memory zip to hold output files

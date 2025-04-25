@@ -1,5 +1,4 @@
-# generate_docs/generate_word_doc.py
-
+# doc_generation/type_group_generators/nonchat_word_doc_generator.py
 from io import BytesIO
 from os import path
 from docx import Document
@@ -8,16 +7,16 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement 
 from docx.shared import RGBColor
-from models.persona import Persona, PersonaPromptSpec
-from models.all_data import AllData
-from models.character import Character
-from models.scenario import Scenario, ScenarioPromptSpec, ScenarioObjective
+from models.platform_xoulai.persona_xoulai import PersonaXoulAI, PersonaPromptSpecXoulAI
+from models.all_json_data import AllJsonData
+from models.platform_xoulai.character_xoulai import CharacterXoulAI
+from models.platform_xoulai.scenario_xoulai import ScenarioXoulAI, ScenarioPromptSpecXoulAI, ScenarioObjectiveXoulAI
 from globals.globals import APP_VERSION, KNOWN_BUGS, NO_DATA_DESCRIPTION
 
 # TODO: How to handle \n in data? other escaped like \"?
 
 # Character Helpers
-def add_character_to_doc(doc: DocxDocument, character: Character):
+def add_character_to_doc(doc: DocxDocument, character: CharacterXoulAI):
     # Add Heading 1 with the character's name
     doc.add_heading(character.name or "Unnamed Character", level=2)
 
@@ -49,7 +48,7 @@ def add_all_characters_to_doc(doc: DocxDocument, characters):
         doc.add_paragraph("No characters were found in the Xoul Data Export ZIP file.")
 
 # Scenario Helpers
-def add_scenario_to_doc(doc: DocxDocument, scenario: Scenario):
+def add_scenario_to_doc(doc: DocxDocument, scenario: ScenarioXoulAI):
     doc.add_heading(scenario.name or "Unnamed Scenario", level=2)
 
     for field_name, value in vars(scenario).items():
@@ -57,13 +56,13 @@ def add_scenario_to_doc(doc: DocxDocument, scenario: Scenario):
             continue
 
         formatted_name = field_name.replace('_', ' ').title()
-        if isinstance(value, ScenarioPromptSpec):
+        if isinstance(value, ScenarioPromptSpecXoulAI):
             doc.add_heading("Prompt Spec", level=3)
             for sub_field, sub_value in vars(value).items():
                 doc.add_heading(sub_field.replace('_', ' ').title(), level=4)
                 doc.add_paragraph(str(sub_value) if sub_value else NO_DATA_DESCRIPTION)
 
-        elif isinstance(value, ScenarioObjective):
+        elif isinstance(value, ScenarioObjectiveXoulAI):
             doc.add_heading("Objective", level=3)
             doc.add_heading("Description", level=4)
             doc.add_paragraph(value.description or NO_DATA_DESCRIPTION)
@@ -96,7 +95,7 @@ def add_all_scenarios_to_doc(doc: DocxDocument, scenarios):
         doc.add_paragraph("No scenarios were found in the Xoul Data Export ZIP file.")
 
 # Persona Helpers
-def add_persona_to_doc(doc: DocxDocument, persona: Persona):
+def add_persona_to_doc(doc: DocxDocument, persona: PersonaXoulAI):
     doc.add_heading(persona.name or "Unnamed Persona", level=2)
 
     for field_name, value in vars(persona).items():
@@ -105,7 +104,7 @@ def add_persona_to_doc(doc: DocxDocument, persona: Persona):
 
         formatted_name = field_name.replace('_', ' ').title()
 
-        if isinstance(value, PersonaPromptSpec):
+        if isinstance(value, PersonaPromptSpecXoulAI):
             doc.add_heading("Prompt Spec", level=3)
             for sub_field, sub_value in vars(value).items():
                 doc.add_heading(sub_field.replace('_', ' ').title(), level=4)
@@ -250,7 +249,7 @@ def add_known_bugs_section_to_doc(doc: DocxDocument):
     doc.add_page_break()
 
 # Generate Doc
-def generate_xoulai_basic_word_doc(all_data: AllData) -> BytesIO:
+def generate_nonchat_word_docs(all_data: AllJsonData) -> BytesIO:
     doc = Document(path.join('app', 'assets', 'numbered_heading_template.docx'))
 
     # Title Page

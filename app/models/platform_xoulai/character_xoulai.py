@@ -1,9 +1,9 @@
-# models/character.py
+# models/platform_xoulai/character_xoulai.py
 from dataclasses import dataclass, fields
 from typing import Optional, List
 
 @dataclass
-class Character:
+class CharacterXoulAI:
     name: Optional[str] = None
     gender: Optional[str] = None
     age: Optional[int] = None

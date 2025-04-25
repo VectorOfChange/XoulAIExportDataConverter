@@ -3,27 +3,27 @@ import streamlit as st
 import zipfile
 import json
 
-from models.persona import Persona
-from models.scenario import Scenario
-from models.character import Character
-from models.lorebook import Lorebook
-from models.all_data import AllData
+from models.platform_xoulai.persona_xoulai import PersonaXoulAI
+from models.platform_xoulai.scenario_xoulai import ScenarioXoulAI
+from models.platform_xoulai.character_xoulai import CharacterXoulAI
+from models.platform_xoulai.lorebook_xoulai import LorebookXoulAI
+from models.all_json_data import AllJsonData
 from utils.custom_logger import log
 
 # Parsers
-def parse_character_jsons(json_list) -> list[Character]:
-    return [Character.from_dict(item) for item in json_list]
+def parse_character_jsons(json_list) -> list[CharacterXoulAI]:
+    return [CharacterXoulAI.from_dict(item) for item in json_list]
 
-def parse_scenario_jsons(json_list) -> list[Scenario]:
-    return [Scenario.from_dict(item) for item in json_list]
+def parse_scenario_jsons(json_list) -> list[ScenarioXoulAI]:
+    return [ScenarioXoulAI.from_dict(item) for item in json_list]
 
-def parse_persona_jsons(json_list) -> list[Persona]:
-    return [Persona.from_dict(item) for item in json_list]
+def parse_persona_jsons(json_list) -> list[PersonaXoulAI]:
+    return [PersonaXoulAI.from_dict(item) for item in json_list]
 
-def parse_lorebook_jsons(json_list) -> list[Lorebook]:
-    return [Lorebook.from_dict(item) for item in json_list]
+def parse_lorebook_jsons(json_list) -> list[LorebookXoulAI]:
+    return [LorebookXoulAI.from_dict(item) for item in json_list]
 
-def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
+def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllJsonData:
     character_jsons = []
     scenario_jsons = []
     # chats_multi_jsons = []
@@ -68,7 +68,7 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
     # TODO: log the found and categorized folders
 
     # Parse each category's data and return the AllData instance
-    return AllData(
+    return AllJsonData(
         characters=parse_character_jsons(character_jsons),
         scenarios=parse_scenario_jsons(scenario_jsons),
         # chats_multi=parse_chat_multi_jsons(chat_multi_jsons),
