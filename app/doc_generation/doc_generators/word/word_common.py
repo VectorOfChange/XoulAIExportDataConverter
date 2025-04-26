@@ -73,7 +73,7 @@ def word_add_known_bugs_section_to_doc(doc: DocxDocument):
     else:
         doc.add_paragraph("No Known Bugs", style='List Bullet')
 
-def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group: TypeGroup):
+def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group: TypeGroup, description: str = ""):
     # Title Page
     prefix = "Converted " if platform is not Platform.XOULAI else ""
     title = doc.add_paragraph(f"{prefix}Xoul AI Data", style='Title')
@@ -82,12 +82,17 @@ def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group
     
     subtitle = doc.add_paragraph(type_group.value, style='Subtitle')
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subtitle.add_run().add_break()
-    subtitle.add_run("Modified for Platform: ")
+    
+    if description:
+        description_subtitle = doc.add_paragraph(description, style='Subtitle')
+        description_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
+    platform_subtitle = doc.add_paragraph("Modified for Platform: ", style='Subtitle')
+    platform_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     if platform is Platform.XOULAI:
-        subtitle.add_run("Unmodified (Original Xoul AI format)")
+        platform_subtitle.add_run("Unmodified (Original Xoul AI format)")
     else:
-        subtitle.add_run(platform)
+        platform_subtitle.add_run(platform)
 
     beta_tag = doc.add_paragraph()
     beta_tag.add_run("BETA TEST", style='Intense Emphasis').font.color.rgb = RGBColor(255, 75, 75) # red

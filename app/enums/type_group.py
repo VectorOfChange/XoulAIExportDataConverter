@@ -2,8 +2,8 @@
 from enum import Enum
 
 class TypeGroup(Enum):
-    CHAT = "Chat History"
-    NONCHAT = "Data Other Than Chat History"
+    CHAT = "Chat Transcript"
+    NONCHAT = "Data Other Than Chat Transcripts"
 
     def __str__(self):
         return self.value  # Allows clean formatting when printed

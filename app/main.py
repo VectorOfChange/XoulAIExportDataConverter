@@ -1,4 +1,5 @@
 # main.py
+import re
 import streamlit as st
 import zipfile
 from io import BytesIO
@@ -31,6 +32,11 @@ if "total_files" not in st.session_state:
 
 # flags
 reset_button_visible = False
+
+def sanitize_filename(filename: str) -> str:
+    # Remove unsafe characters and trim length
+    filename = re.sub(r'[^a-zA-Z0-9_\-\. ]', '_', filename)
+    return filename[:200]  # Limit to 200 characters
 
 # Function to disable the user options
 def disable_user_options():
@@ -231,7 +237,7 @@ with st.expander("Xoul Data to Process", expanded=True):
         user_option_content_choices.append(st.checkbox("Scenarios", value=True, disabled=st.session_state.user_options_disabled, key="app_content_scenarios"))
     
     with user_option_content_col2:
-        # user_option_content_choices.append(st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single"))
+        user_option_content_choices.append(st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single"))
         # user_option_content_choices.append(st.checkbox("Group Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_group"))
         user_option_content_choices.append(st.checkbox("Lorebooks", value=True, disabled=st.session_state.user_options_disabled, key="app_content_lorebooks"))
 
@@ -339,7 +345,7 @@ if uploaded_file is not None:
 
             with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip: 
                 for doc_buffer in generated_doc_buffers:
-                    doc_filename = doc_buffer.filename
+                    doc_filename = sanitize_filename(doc_buffer.filename)
                     output_zip.writestr(doc_filename, doc_buffer.buffer.getvalue())
                     log(f"Document added to ZIP: {doc_filename}")
 

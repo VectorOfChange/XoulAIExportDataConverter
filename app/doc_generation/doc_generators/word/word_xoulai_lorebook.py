@@ -61,7 +61,7 @@ def word_xoulai_add_all_lorebooks_to_doc(doc: DocxDocument, lorebooks: list[Lore
     doc.add_heading("Lorebooks", level=1)
     
     if lorebooks:
-        for idx, lorebook in enumberate(lorebooks):
+        for idx, lorebook in enumerate(lorebooks):
             word_xoulai_add_lorebook_to_doc(doc, lorebook)
             
             if idx < len(lorebooks) - 1:

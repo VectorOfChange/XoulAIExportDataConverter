@@ -29,9 +29,7 @@ PLATFORM_CONTENT_GENERATORS = {
 def generate_nonchat_word_docs(all_data: AllData, user_options: UserOptions) -> list[FileBuffer]:
     doc_buffers: list[FileBuffer] = []
 
-    # BUG: Handle case where user doesn't check a checkbox
-
-    for platform_data in all_data.get_all_data():
+    for platform_data in all_data.get_all_platform_data():
         doc = Document(path.join('app', 'assets', 'numbered_heading_template.docx'))
 
         # Content

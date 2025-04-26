@@ -1,5 +1,6 @@
 # doc_generation/format_specific_doc_orchestrators/word_doc_generation_orchestrator.py
 from io import BytesIO
+from app.doc_generation.type_group_generators.word_doc_chat_generator import generate_chat_word_docs
 from doc_generation.type_group_generators.word_doc_nonchat_generator import generate_nonchat_word_docs
 from dtos.file_buffer import FileBuffer
 from models.all_data import AllData
@@ -15,8 +16,8 @@ def generate_word_docs(all_data: AllData, user_options: UserOptions) -> list[Fil
     has_chat = "chats_single" in selected or "chats_group" in selected
     has_non_chat = any(opt not in ("chats_single", "chats_group") for opt in selected)
 
-    # if has_chat:
-    #     doc_buffers.extend(generate_chat_word_docs(all_data, user_options))
+    if has_chat:
+        doc_buffers.extend(generate_chat_word_docs(all_data, user_options))
     if has_non_chat:
         doc_buffers.extend(generate_nonchat_word_docs(all_data, user_options))
 
