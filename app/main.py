@@ -31,7 +31,6 @@ if "total_files" not in st.session_state:
 
 # flags
 reset_button_visible = False
-# process_button_visible = False # TODO: can this be removed?
 
 # Function to disable the user options
 def disable_user_options():
@@ -61,9 +60,6 @@ def show_reset_button():
 
 # Function to show process button
 def show_process_button(user_option_content_choices: list, user_option_platform_choices: list, user_option_format_choices: list):
-    # TODO: can the visible button flag be removed here?
-    #global process_button_visible
-
     user_choices_invalid = (
         not any(user_option_content_choices)
         or not any(user_option_platform_choices)
@@ -75,8 +71,6 @@ def show_process_button(user_option_content_choices: list, user_option_platform_
         or user_choices_invalid
     )
 
-    #if not process_button_visible:
-    #    process_button_visible = True
     with func_button_col1:
         process_button_internal = st.button("🚀 Process File", on_click=disable_user_options, type="primary", disabled=process_button_disabled)
     
