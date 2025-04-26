@@ -8,13 +8,13 @@ from docx.shared import RGBColor, Pt
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement 
 
-from app.doc_generation.doc_generators.word.word_common import word_add_info_section_to_doc, word_add_known_bugs_section_to_doc, word_add_title_page_to_doc, word_add_toc_to_doc
-from app.dtos.file_buffer import FileBuffer
-from app.enums.type_group import TypeGroup
-from app.globals.globals import NO_DATA_DESCRIPTION
-from app.models.platform_xoulai.all_data_xoulai import AllDataXoulAI
-from app.models.platform_xoulai.chat_common_xoulai import ChatConversationXoulAI
-from app.models.platform_xoulai.chat_single_xoulai import ChatSingleMessageXoulAI
+from doc_generation.doc_generators.word.word_common import word_add_info_section_to_doc, word_add_known_bugs_section_to_doc, word_add_title_page_to_doc, word_add_toc_to_doc
+from dtos.file_buffer import FileBuffer
+from enums.type_group import TypeGroup
+from globals.globals import NO_DATA_DESCRIPTION
+from models.platform_xoulai.all_data_xoulai import AllDataXoulAI
+from models.platform_xoulai.chat_common_xoulai import ChatConversationXoulAI
+from models.platform_xoulai.chat_single_xoulai import ChatSingleMessageXoulAI
 
 def word_xoulai_add_chat_single_info_to_doc(doc: DocxDocument, chat_info: ChatConversationXoulAI):
     doc.add_page_break()
@@ -159,7 +159,7 @@ def word_xoulai_add_chat_single_transcript_to_doc(doc: DocxDocument, messages: l
                 shd_alt.set(qn('w:fill'), bg_fill)
                 ppr_alt.append(shd_alt)
 
-def word_xoulai_generate_chat_single_docs(platform_data: AllDataXoulAI) -> list[FileBuffer]:
+def word_xoulai_generate_chat_single_docs(platform_data: AllDataXoulAI, on_progress=None) -> list[FileBuffer]:
     doc_buffers: list[FileBuffer] = []
     
     for idx, chat_single in enumerate(platform_data.chats_single):
@@ -182,5 +182,8 @@ def word_xoulai_generate_chat_single_docs(platform_data: AllDataXoulAI) -> list[
         filename = f"XoulAI_Single_Chat_Transcript_{idx}_{chat_single.get_character_slug()}.docx"
         
         doc_buffers.append(FileBuffer(doc_buffer, filename))
+
+        if on_progress:
+            on_progress()
     
     return doc_buffers

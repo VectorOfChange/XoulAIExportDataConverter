@@ -1,6 +1,7 @@
 # platform_specific_generators/word/word_common.py
 from docx.document import Document as DocxDocument
 
+from app.enums.bug_type import BugType
 from enums.platform import Platform
 from enums.type_group import TypeGroup
 from globals.globals import APP_VERSION, KNOWN_BUGS
@@ -64,12 +65,13 @@ def word_add_known_bugs_section_to_doc(doc: DocxDocument):
     
     doc.add_heading("Known Bugs and Issues", level=1)
     
-    doc.add_paragraph(f"Known bugs and issues (app version: {APP_VERSION}):")
+    doc.add_paragraph(f"Known bugs and issue with app version {APP_VERSION} that impact data integrity or data quality (bugs that do not impact data are not listed here):")
     
-    # TODO: Split known bugs into app and data, only show data here
-    if KNOWN_BUGS:
-        for bug in KNOWN_BUGS:
-            doc.add_paragraph(bug, style='List Bullet')
+    data_bugs = [bug["description"] for bug in KNOWN_BUGS if bug["type"] == BugType.DATA]
+
+    if data_bugs:
+        for bug_description in data_bugs:
+            doc.add_paragraph(bug_description, style='List Bullet')
     else:
         doc.add_paragraph("No Known Bugs", style='List Bullet')
 

@@ -13,6 +13,8 @@ from enums.platform import Platform
 from enums.type_group import TypeGroup
 from models.all_data import AllData
 
+# TODO: add no generator found warning...or remove from the other Platform.XOULAI generator?
+
 PLATFORM_CONTENT_GENERATORS = {
     Platform.XOULAI: {
         "characters": word_xoulai_add_all_characters_to_doc,
@@ -26,7 +28,7 @@ PLATFORM_CONTENT_GENERATORS = {
 }
 
 # Generate Doc
-def generate_nonchat_word_docs(all_data: AllData, user_options: UserOptions) -> list[FileBuffer]:
+def generate_nonchat_word_docs(all_data: AllData, user_options: UserOptions, on_progress=None) -> list[FileBuffer]:
     doc_buffers: list[FileBuffer] = []
 
     for platform_data in all_data.get_all_platform_data():
@@ -51,6 +53,9 @@ def generate_nonchat_word_docs(all_data: AllData, user_options: UserOptions) -> 
         filename = f"XoulAI_NonChat_Data_For_{platform_data.platform}.docx"
         
         doc_buffers.append(FileBuffer(doc_buffer, filename))
+
+        if on_progress:
+            on_progress()
 
     return doc_buffers
 

@@ -1,7 +1,8 @@
 # models/platform_xoulai/all_data_xoulai.py
 from dataclasses import dataclass, field
+from typing import Any
 
-from app.models.platform_xoulai.chat_single_xoulai import ChatSingleXoulAI
+from models.platform_xoulai.chat_single_xoulai import ChatSingleXoulAI
 from enums.platform import Platform
 from models.platform_xoulai.lorebook_xoulai import LorebookXoulAI
 from models.platform_xoulai.persona_xoulai import PersonaXoulAI
@@ -16,5 +17,6 @@ class AllDataXoulAI:
     personas: list[PersonaXoulAI]
     lorebooks: list[LorebookXoulAI]
     chats_single: list[ChatSingleXoulAI]
-    # chats_multi: list[ChatMultiXoulAI]
+    # chats_multi: list[ChatMultiXoulAI] = field(default_factory=list)
+    chats_multi: list[Any] = field(default_factory=list)
     

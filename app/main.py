@@ -19,6 +19,7 @@ if "user_options_disabled" not in st.session_state:
     st.session_state.user_options_disabled = False
 
 # Session state for holding output
+# if you add something here, remember to reset it in the reset button action
 if "processed" not in st.session_state:
     st.session_state.processed = False
 if "output_zip" not in st.session_state:
@@ -27,8 +28,14 @@ if "log_output" not in st.session_state:
     st.session_state.log_output = ""
 if "log_messages" not in st.session_state:
     st.session_state.log_messages = []
-if "total_files" not in st.session_state:
-    st.session_state.total_files = 0
+if "total_raw_files" not in st.session_state:
+    st.session_state.total_raw_files = 0
+if "total_doc_files" not in st.session_state:
+    st.session_state.total_doc_files = 0
+if "completed_doc_files" not in st.session_state:
+    st.session_state.completed_doc_files = 0
+if "completed_tasks" not in st.session_state:
+    st.session_state.completed_tasks = 0
 
 # flags
 reset_button_visible = False
@@ -53,7 +60,10 @@ def reset_app():
     st.session_state.output_zip = None
     st.session_state.log_output = ""
     st.session_state.log_messages = []
-    st.session_state.total_files = 0
+    st.session_state.total_raw_files = 0
+    st.session_state.total_doc_files = 0
+    st.session_state.completed_doc_files = 0
+    st.session_state.completed_tasks = 0
 
 # Function to show reset button
 def show_reset_button():
@@ -88,7 +98,7 @@ def show_process_button(user_option_content_choices: list, user_option_platform_
 # Function to update progress for JSON extraction
 def update_extraction_progress(completed_files: int) -> None:
     """
-    Update the progress bar and status text with the number of completed files.
+    Update the extraction progress bar and status text with the number of completed files.
 
     Args:
         completed_files (int): The number of files that have been fully processed.
@@ -104,11 +114,43 @@ def update_extraction_progress(completed_files: int) -> None:
     This function can also be called from non-loop contexts where an exact count of
     completed files is tracked separately.
     """
-    progress = completed_files / st.session_state.total_files
-    progress_bar.progress(progress)
-    status_message = f"Extracted JSON from {completed_files} of {st.session_state.total_files} JSON files..."
-    status_text.text(status_message)
+    progress = completed_files / st.session_state.total_raw_files
+    extraction_progress_bar.progress(progress)
+    status_message = f"Extracted data from {completed_files} of {st.session_state.total_raw_files} JSON files..."
+    
+    if progress == 1:
+        extraction_status_text.success("🎉 " + status_message)
+    else:
+        extraction_status_text.text(status_message)
+    
     log(status_message)
+
+# Function to update progress for JSON extraction
+def increment_doc_generation_progress() -> None:
+    """
+    Increment the document generation progress bar and status text with the number of completed files.
+    """
+    st.session_state.completed_doc_files += 1
+
+    progress = st.session_state.completed_doc_files / st.session_state.total_doc_files
+    doc_generation_progress_bar.progress(progress)
+    status_message = f"Generated {st.session_state.completed_doc_files} of {st.session_state.total_doc_files} Documents..."
+    
+    if progress == 1:
+        doc_generation_status_text.success("🎉 " + status_message)
+    else:
+        doc_generation_status_text.text(status_message)
+
+    log(status_message)
+
+def increment_data_manipulation_progress() -> None:
+    """
+    Increment the document generation progress bar and status text with the number of completed files.
+
+    NOTE: THIS JUST SETS IT TO COMPLETE. WRITE FOR REAL ONCE DATA MANIP IS ADDED
+    """
+    manipulation_progress_bar.progress(1.0)
+    manipulation_status_text.success("Skipped...Data Manipulation Feature Not Available Yet")
 
 st.set_page_config(page_title="Xoul AI Data Converter", layout="centered")
 
@@ -183,7 +225,7 @@ with st.sidebar:
     with st.expander("Known Bugs"):
         if KNOWN_BUGS:
             for bug in KNOWN_BUGS:
-                st.markdown("- " + bug)
+                st.markdown("- " + f"({bug['type'].value}): {bug['description']}")
         else:
             st.markdown("- No known bugs")
 
@@ -285,6 +327,9 @@ with st.expander("File Output Types", expanded=True):
     if not any(user_option_format_choices):
         st.error("You must choose at least one file output type to generate.")
 
+# TODO: For chat transcripts, documents are only Xoul AI platform, other platforms are only JSON. Enforce options if needed, add note about this, code exceptions in backend
+# TODO: JSON output shouldn't do Xoul AI platform
+
 st.subheader("Step 2: Upload File", divider=True)
 uploaded_file = st.file_uploader("Upload your Xoul AI Data Export Zip file", type=["zip"])
 
@@ -308,36 +353,56 @@ if uploaded_file is not None:
         user_options = UserOptions.from_session_state()
 
         st.subheader("Step 4: Wait for Processing to Finish", divider=True)        
-        # Progress bar
-        progress_bar = st.progress(0)
-        status_text = st.empty()
+        
+        progress_col1, progress_col2, progress_col3 = st.columns(3)
+        
+        with progress_col1:
+            # Data Extraction Progress bar
+            st.markdown("Data Extraction Progress")
+            extraction_progress_bar = st.progress(0)
+            extraction_status_text = st.empty()
+        
+        with progress_col2:
+            # Data Manipulation Progress bar
+            st.markdown("Data Manipulation Progress")
+            manipulation_progress_bar = st.progress(0)
+            manipulation_status_text = st.empty()
+        
+        with progress_col3:
+            # Document Creation Progress bar
+            st.markdown("Document Creation Progress")
+            doc_generation_progress_bar = st.progress(0)
+            doc_generation_status_text = st.empty()
 
         try:
             zip_bytes = BytesIO(uploaded_file.read())
 
             with zipfile.ZipFile(zip_bytes, "r") as zip_file:
                 try:
-                    all_data = extract_data(zip_file, on_progress=update_extraction_progress)
+                    with progress_col2, st.spinner("Extraing Data..."):
+                        all_data = extract_data(zip_file, on_progress=update_extraction_progress)
 
                 except ValueError as extract_error:
                     error_msg = f"Error during JSON Extraction: {extract_error}"
                     log(error_msg)
                     st.error(error_msg)
                     # TODO: properly handle this error, stop processing, show reset button, disable download button
-                
-                # Done message
+
                 # TODO: add success and error files count
-                status_text.success(f"🎉 {st.session_state.total_files}/{st.session_state.total_files} files processed!")
-                log(f"{st.session_state.total_files}/{st.session_state.total_files} files processed.")
+
 
         except Exception as unzip_e:
             st.error(f"❌ Failed to open ZIP: {unzip_e}")
             log(f"Failed to open ZIP: {unzip_e}")
 
+        # Manipulate Data
+        increment_data_manipulation_progress()
+
         # GENERATE AND SAVE DOCUMENTS
         # TODO: split into two sections to get better logging and error reporting
         try:
-            generated_doc_buffers = generate_all_docs(all_data, user_options)
+            with progress_col3, st.spinner("Generating Docs..."):
+                generated_doc_buffers = generate_all_docs(all_data, user_options, on_progress=increment_doc_generation_progress)
 
             # Open output ZIP
             # Create a new in-memory zip to hold output files
@@ -398,7 +463,9 @@ st.markdown("""
                 * FEATURE: Make options use selectable
                 * Refactor backend to prepare for expansion
             * Version ```0.0.4```:
+                * FEATURE: Extract individual chats
                 * GUI: Enforce valid user choices
+                * GUI: Fix and enhance progress bar
             """)
 
 st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)

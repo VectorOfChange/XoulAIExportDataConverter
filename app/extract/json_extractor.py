@@ -3,7 +3,7 @@ import streamlit as st
 import zipfile
 import json
 
-from app.models.platform_xoulai.chat_single_xoulai import ChatSingleXoulAI
+from models.platform_xoulai.chat_single_xoulai import ChatSingleXoulAI
 from models.platform_xoulai.all_data_xoulai import AllDataXoulAI
 from models.platform_xoulai.persona_xoulai import PersonaXoulAI
 from models.platform_xoulai.scenario_xoulai import ScenarioXoulAI
@@ -47,9 +47,9 @@ def extract_data(zip_file: zipfile.ZipFile, on_progress=None) -> AllData:
     }
 
     file_list = [name for name in zip_file.namelist() if name.endswith(".json") and not name.endswith("/")]
-    st.session_state.total_files = len(file_list)
+    st.session_state.total_raw_files = len(file_list)
 
-    if st.session_state.total_files == 0:
+    if st.session_state.total_raw_files == 0:
         raise ValueError("No JSON files were found in the ZIP archive.")
     else:
         # Iterate over the files and categorize them based on the name prefix

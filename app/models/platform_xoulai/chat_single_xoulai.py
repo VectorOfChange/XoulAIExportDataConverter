@@ -1,7 +1,7 @@
 # models/platform_xoulai/chat_single_xoulai.py
 from dataclasses import dataclass, field, fields
 from typing import Optional, Any
-from app.models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
+from models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
 
 @dataclass
 class ChatSingleMessageXoulAI:
