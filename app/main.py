@@ -31,7 +31,7 @@ if "total_files" not in st.session_state:
 
 # flags
 reset_button_visible = False
-process_button_visible = False
+# process_button_visible = False # TODO: can this be removed?
 
 # Function to disable the user options
 def disable_user_options():
@@ -56,18 +56,34 @@ def show_reset_button():
     
     if not reset_button_visible:
         reset_button_visible = True
-        func_button_col2.button("⬅️ Restart (Clears Results)", on_click=reset_app)
+        with func_button_col2:
+            st.button("⬅️ Restart (Clears Results)", on_click=reset_app)
 
 # Function to show process button
-def show_process_button():
-    global process_button_visible
+def show_process_button(user_option_content_choices: list, user_option_platform_choices: list, user_option_format_choices: list):
+    # TODO: can the visible button flag be removed here?
+    #global process_button_visible
+
+    user_choices_invalid = (
+        not any(user_option_content_choices)
+        or not any(user_option_platform_choices)
+        or not any(user_option_format_choices)
+    )
     
-    if not process_button_visible:
-        process_button_visible = True
-        with func_button_col1:
-            process_button_internal = st.button("🚀 Process File", on_click=disable_user_options, type="primary", disabled=st.session_state.user_options_disabled)
-        
-        return process_button_internal
+    process_button_disabled = ( 
+        st.session_state.user_options_disabled
+        or user_choices_invalid
+    )
+
+    #if not process_button_visible:
+    #    process_button_visible = True
+    with func_button_col1:
+        process_button_internal = st.button("🚀 Process File", on_click=disable_user_options, type="primary", disabled=process_button_disabled)
+    
+    if user_choices_invalid:
+        st.error("Invalid choices. Review Step 1. Make sure there's at least one box checked in each group of choices.")
+
+    return process_button_internal
 
 # Function to update progress for JSON extraction
 def update_extraction_progress(completed_files: int) -> None:
@@ -213,46 +229,61 @@ with st.expander("Xoul Data to Process", expanded=True):
     
     user_option_content_col1, user_option_content_col2 = st.columns(2)
 
+    user_option_content_choices = []
+
     with user_option_content_col1:
-        st.checkbox("Xouls", value=True, disabled=st.session_state.user_options_disabled, key="app_content_characters")
-        st.checkbox("Personas", value=True, disabled=st.session_state.user_options_disabled, key="app_content_personas")
-        st.checkbox("Scenarios", value=True, disabled=st.session_state.user_options_disabled, key="app_content_scenarios")
+        user_option_content_choices.append(st.checkbox("Xouls", value=True, disabled=st.session_state.user_options_disabled, key="app_content_characters"))
+        user_option_content_choices.append(st.checkbox("Personas", value=True, disabled=st.session_state.user_options_disabled, key="app_content_personas"))
+        user_option_content_choices.append(st.checkbox("Scenarios", value=True, disabled=st.session_state.user_options_disabled, key="app_content_scenarios"))
     
     with user_option_content_col2:
-        # st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single")
-        # st.checkbox("Group Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_group")
-        st.checkbox("Lorebooks", value=True, disabled=st.session_state.user_options_disabled, key="app_content_lorebooks")
+        # user_option_content_choices.append(st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single"))
+        # user_option_content_choices.append(st.checkbox("Group Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_group"))
+        user_option_content_choices.append(st.checkbox("Lorebooks", value=True, disabled=st.session_state.user_options_disabled, key="app_content_lorebooks"))
+
+    if not any(user_option_content_choices):
+        st.error("You must choose at least one type of Xoul data to process.")
 
 with st.expander("Platform Specific Adjustment", expanded=True):
     st.markdown("Choose the platforms you want to generate data for. Each selection will generate a set of files optimized for use with the platform.")
     
     user_option_platform_col1, user_option_platform_col2 = st.columns(2)
 
+    user_option_platform_choices = []
+
     with user_option_platform_col1:
-        st.checkbox("Xoul AI (original data)", value=True, disabled=st.session_state.user_options_disabled, key="app_platform_xoulai")
-        # st.checkbox("MyAI", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_myai")
+        user_option_platform_choices.append(st.checkbox("Unmodified (Original Xoul AI Data)", value=True, disabled=st.session_state.user_options_disabled, key="app_platform_xoulai"))
+        # user_option_platform_choices.append(st.checkbox("MyAI", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_myai"))
     
     # with user_option_platform_col2:
-    #     st.checkbox("Wyvern", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_wyvern")
-    #     st.checkbox("CharSnap", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_charsnap")
-    #     st.checkbox("Sakura", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_sakura")
+    #     user_option_platform_choices.append(st.checkbox("Wyvern", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_wyvern"))
+    #     user_option_platform_choices.append(st.checkbox("CharSnap", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_charsnap"))
+    #     user_option_platform_choices.append(st.checkbox("Sakura", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_sakura"))
     
-    # st.markdown("* Tavern Card v2 JSON is a type of JSON that is accepted at many sites.") # TODO: create Tavern Card v2 FAQ
+    # st.markdown("* Tavern Card v2 JSON is a type of JSON that is accepted at many sites. Make sure you choose JSON output in the ```File Output Types```` section below.") # TODO: create Tavern Card v2 FAQ
     
+    if not any(user_option_platform_choices):
+        st.error("You must choose at least one platform to generate data for.")
+
 with st.expander("File Output Types", expanded=True):
     st.markdown("Choose the types of files you want to generate.")
     
     user_option_format_col1, user_option_format_col2 = st.columns(2)
 
+    user_option_format_choices = []
+
     with user_option_format_col1:
-        st.checkbox("Word (.docx)", value=True, disabled=st.session_state.user_options_disabled, key="app_format_word")
-    #     st.checkbox("Text (.txt)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_txt")
+        user_option_format_choices.append(st.checkbox("Word (.docx)", value=True, disabled=st.session_state.user_options_disabled, key="app_format_word"))
+    #     user_option_format_choices.append(st.checkbox("Text (.txt)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_txt"))
     
     # with user_option_format_col2:
-    #     st.checkbox("Markdown (.md)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_md")
-    #     st.checkbox("Platform Specific JSON (.json)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_json")
+    #     user_option_format_choices.append(st.checkbox("Markdown (.md)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_md"))
+    #     user_option_format_choices.append(st.checkbox("Platform Specific JSON (.json)", value=False, disabled=st.session_state.user_options_disabled, key="app_format_json"))
     
     # st.markdown("* Platform Specific JSON files are used by specific platforms and not interchangeable with other platforms. This will only be generated for platforms that support JSON importing.") # TODO: Create JSON file FAQ
+
+    if not any(user_option_format_choices):
+        st.error("You must choose at least one file output type to generate.")
 
 st.subheader("Step 2: Upload File", divider=True)
 uploaded_file = st.file_uploader("Upload your Xoul AI Data Export Zip file", type=["zip"])
@@ -261,12 +292,12 @@ if uploaded_file is not None:
     st.success("✅ ZIP file uploaded!")
 
     st.subheader("Step 3: Start Processing", divider=True)
-    st.markdown("To reset the form, click the Restart button")
+    
 
     # Show process button
     func_button_col1, func_button_col2 = st.columns(2)
     
-    process_button = show_process_button()
+    process_button = show_process_button(user_option_content_choices, user_option_platform_choices, user_option_format_choices)
 
     if process_button and not st.session_state.processed:
         
@@ -335,7 +366,7 @@ if uploaded_file is not None:
         # TODO: fix status bar, make it accurate, make it accommodate session_state.processed properly 
 
     if st.session_state.processed:            
-        show_reset_button();
+        show_reset_button()
 
         st.subheader("Step 5: Download Results", divider=True)
         
@@ -366,6 +397,8 @@ st.markdown("""
             * Version ```0.0.3```:
                 * FEATURE: Make options use selectable
                 * Refactor backend to prepare for expansion
+            * Version ```0.0.4```:
+                * GUI: Enforce valid user choices
             """)
 
 st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
