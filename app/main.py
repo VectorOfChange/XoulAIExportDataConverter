@@ -466,6 +466,7 @@ st.markdown("""
                 * FEATURE: Extract individual chats
                 * GUI: Enforce valid user choices
                 * GUI: Fix and enhance progress bar
+                * FIX: Only include bugs that impact data in the documents
             """)
 
 st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
