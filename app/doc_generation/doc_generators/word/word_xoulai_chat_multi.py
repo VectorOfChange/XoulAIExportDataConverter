@@ -102,13 +102,13 @@ def word_xoulai_add_chat_multi_transcript_to_doc(doc: Document, messages: list[C
     # Define shades of grey for different speakers.  More visually appealing.
     grey_shades = [
         "F8F8F8",  # Very light grey
-        "F0F0F0",  # Light grey
+        #"F0F0F0",  # Light grey
         "E0E0E0",  # Medium light grey
-        "D0D0D0",  # Medium grey
+        #"D0D0D0",  # Medium grey
         "C0C0C0",  # Medium dark grey
-        "B0B0B0",  # Dark Medium Grey
+        #"B0B0B0",  # Dark Medium Grey
         "A0A0A0",  # Dark grey
-        "909090",  # Very dark grey
+        #"909090",  # Very dark grey
     ]
     speaker_colors = {}  # Dictionary to store assigned colors
 
