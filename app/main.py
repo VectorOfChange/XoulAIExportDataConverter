@@ -557,6 +557,7 @@ st.markdown("""
             * Version ```0.0.4```:
                 * FEATURE: Generate individual chats
                 * FEATURE: Generate group chats
+                * FEATURE: Image/Avatar downloading from Xoul AI servers 
                 * GUI: Enforce valid user choices
                 * GUI: Fix and enhance progress bar
                 * FIX: Only include bugs that impact data in the documents
