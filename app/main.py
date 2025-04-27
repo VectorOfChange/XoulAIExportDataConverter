@@ -279,9 +279,9 @@ with st.expander("Xoul Data to Process", expanded=True):
         user_option_content_choices.append(st.checkbox("Scenarios", value=True, disabled=st.session_state.user_options_disabled, key="app_content_scenarios"))
     
     with user_option_content_col2:
-        user_option_content_choices.append(st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single"))
-        # user_option_content_choices.append(st.checkbox("Group Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_group"))
         user_option_content_choices.append(st.checkbox("Lorebooks", value=True, disabled=st.session_state.user_options_disabled, key="app_content_lorebooks"))
+        user_option_content_choices.append(st.checkbox("Individual Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_single"))
+        user_option_content_choices.append(st.checkbox("Group Chats", value=True, disabled=st.session_state.user_options_disabled, key="app_content_chats_multi"))
 
     if not any(user_option_content_choices):
         st.error("You must choose at least one type of Xoul data to process.")
@@ -463,7 +463,8 @@ st.markdown("""
                 * FEATURE: Make options use selectable
                 * Refactor backend to prepare for expansion
             * Version ```0.0.4```:
-                * FEATURE: Extract individual chats
+                * FEATURE: Generate individual chats
+                * FEATURE: Generate group chats
                 * GUI: Enforce valid user choices
                 * GUI: Fix and enhance progress bar
                 * FIX: Only include bugs that impact data in the documents
@@ -471,7 +472,5 @@ st.markdown("""
 
 st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
 
-# TODO: add changelog 
 # TODO: Add JSON explainer
-# TODO: Add platform support table
 # TODO: Add jump to links and jump back to to top links

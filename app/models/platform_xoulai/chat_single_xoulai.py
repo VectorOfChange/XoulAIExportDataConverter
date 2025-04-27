@@ -10,7 +10,7 @@ class ChatSingleMessageXoulAI:
     name: Optional[str] = None
     turn_id: Optional[int] = None
     timestamp: Optional[str] = None
-    metadata: Optional[ChatMessageMetadataXoulAI] = None
+    metadata: ChatMessageMetadataXoulAI = field(default_factory=ChatMessageMetadataXoulAI)
 
 @dataclass
 class ChatSingleXoulAI:
@@ -70,7 +70,10 @@ class ChatSingleXoulAI:
     def get_chat_description(self) -> str:
         if self.conversation and self.conversation.xouls:
             xoul = self.conversation.xouls[0]
-            return f"Character: {xoul.name} ({xoul.slug})"
+            return f"""
+                    Character: {xoul.name} ({xoul.slug})
+                    Persona: {', '.join(self.get_persona_names())}
+                    """
         else:
             return "No character information available."
 
@@ -87,4 +90,19 @@ class ChatSingleXoulAI:
             return xoul.slug
         else:
             return "CHAR_ID_MISSING"
+        
+    def get_persona_names(self, return_none_if_empty: bool = False) -> Optional[list[str]]:
+            """
+            Returns a list of persona names.
 
+            Args:
+                return_none_if_empty: If True, returns None if there are no persona names.
+                                    If False (default), returns a list containing "No named personas".
+            """
+            names = []
+            if self.conversation and self.conversation.personas:
+                names = [persona.name for persona in self.conversation.personas]
+            elif not return_none_if_empty:
+                names = ["No named personas"]
+
+            return names

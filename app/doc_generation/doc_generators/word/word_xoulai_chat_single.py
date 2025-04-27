@@ -30,7 +30,7 @@ def word_xoulai_add_chat_single_info_to_doc(doc: DocxDocument, chat_info: ChatCo
         formatted_name = field_name.replace('_', ' ').title()
 
         if field_name == "xouls":
-            doc.add_heading("Xouls", level=3)
+            doc.add_heading("Characters", level=3)
             if value:
                 for idx, xoul in enumerate(value):
                     doc.add_heading(f"Xoul {idx + 1}", level=4)
@@ -93,7 +93,7 @@ def word_xoulai_add_chat_single_transcript_to_doc(doc: DocxDocument, messages: l
     for message in messages:
         role = (message.role or "unknown").lower()
         content = message.content or NO_DATA_DESCRIPTION
-        name = "User" if role == "user" else char_name
+        name = "User" if role == "user" else char_name #TODO: change the persona name for user if possible
 
         # Determine styling based on role
         if role == "assistant":
@@ -179,7 +179,10 @@ def word_xoulai_generate_chat_single_docs(platform_data: AllDataXoulAI, on_progr
         doc.save(doc_buffer)
 
         # get filename
-        filename = f"XoulAI_Single_Chat_Transcript_{idx}_{chat_single.get_character_slug()}.docx"
+        persona_names = chat_single.get_persona_names(return_none_if_empty=True)
+        persona_name = persona_names[0] if persona_names else None
+
+        filename = f"XoulAI_Single_Chat_Transcript_{idx}_{chat_single.get_character_slug()}{'_with_' + persona_name if persona_name else ''}.docx"
         
         doc_buffers.append(FileBuffer(doc_buffer, filename))
 

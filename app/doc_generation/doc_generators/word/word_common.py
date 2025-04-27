@@ -1,7 +1,7 @@
 # platform_specific_generators/word/word_common.py
 from docx.document import Document as DocxDocument
 
-from app.enums.bug_type import BugType
+from enums.bug_type import BugType
 from enums.platform import Platform
 from enums.type_group import TypeGroup
 from globals.globals import APP_VERSION, KNOWN_BUGS

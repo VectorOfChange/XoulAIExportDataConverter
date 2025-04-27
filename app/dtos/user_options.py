@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import List
 import streamlit as st
 
-CONTENT_ORDER = ["characters", "scenarios", "personas", "lorebooks", "chats_single", "chats_group"]
+CONTENT_ORDER = ["characters", "scenarios", "personas", "lorebooks", "chats_single", "chats_multi"]
 
 @dataclass
 class UserOptions:
