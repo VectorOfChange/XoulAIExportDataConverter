@@ -169,8 +169,9 @@ with st.sidebar:
                     | Personas | ```beta``` | 
                     | Scenarios | ```beta``` | 
                     | Lorebooks | ```beta``` |
-                    | Single Chats | ```in progress``` |
-                    | Group Chats | ```in progress``` |
+                    | Single Chats | ```beta``` |
+                    | Group Chats | ```beta``` |
+                    | Images/Avatars | ```in progress``` |
                     """)
         
     with st.expander("Output File Types"):
