@@ -1,6 +1,7 @@
 # models/platform_xoulai/chat_multi_xoulai.py
 from dataclasses import dataclass, field, fields
 import json
+import textwrap
 from typing import Optional, Any, List
 from utils.custom_logger import log
 from models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
@@ -86,17 +87,19 @@ class ChatMultiXoulAI:
 
         return cls(**filtered_data)
 
-    def get_chat_description(self) -> str:
-        if self.conversation and self.conversation.name:
-            return f"""
-                    Group Chat: {self.get_conversation_name()}
-                    Characters: {', '.join(self.get_character_names())}
-                    Personas: {', '.join(self.get_persona_names())}
-                    """
+    def get_chat_description(self) -> Optional[list[str]]:
+        description = []
+        
+        if self.conversation:
+            description.append(f"Group Chat: {self.get_conversation_name()}")
+            description.append(f"Characters: {', '.join(self.get_character_names())}")
+            description.append(f"Personas: {', '.join(self.get_persona_names())}")
         else:
-            return "Unnamed Group Chat"
+            description.append("ERROR: Conversation Data Missing")
+        
+        return description
 
-    def get_character_names(self, return_none_if_empty: bool = False) -> Optional[list[str]]:
+    def get_character_names(self, return_none_if_empty: bool = False) -> list[str]:
         """
         Returns a list of character names.
 
@@ -112,7 +115,7 @@ class ChatMultiXoulAI:
 
         return names
 
-    def get_persona_names(self, return_none_if_empty: bool = False) -> Optional[list[str]]:
+    def get_persona_names(self, return_none_if_empty: bool = False) -> list[str]:
             """
             Returns a list of persona names.
 
@@ -128,8 +131,8 @@ class ChatMultiXoulAI:
 
             return names
 
-    def get_conversation_name(self) -> Optional[str]:
+    def get_conversation_name(self) -> str:
         if self.conversation and self.conversation.name:
-            return f"Group Chat: {self.conversation.name}"
+            return f"{self.conversation.name}"
         else:
             return "Unnamed Group Chat"

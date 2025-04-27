@@ -8,7 +8,7 @@ from globals.globals import APP_VERSION, KNOWN_BUGS
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement 
-from docx.shared import RGBColor
+from docx.shared import RGBColor, Pt
 
 # Common/Shared Helpers
 def word_add_info_section_to_doc(doc: DocxDocument, platform: Platform):
@@ -75,7 +75,7 @@ def word_add_known_bugs_section_to_doc(doc: DocxDocument):
     else:
         doc.add_paragraph("No Known Bugs", style='List Bullet')
 
-def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group: TypeGroup, description: str = ""):
+def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group: TypeGroup, description: list[str] = []):
     # Title Page
     prefix = "Converted " if platform is not Platform.XOULAI else ""
     title = doc.add_paragraph(f"{prefix}Xoul AI Data", style='Title')
@@ -85,19 +85,25 @@ def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group
     subtitle = doc.add_paragraph(type_group.value, style='Subtitle')
     subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
-    if description:
-        description_subtitle = doc.add_paragraph(description, style='Subtitle')
-        description_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    description_subtitle = doc.add_paragraph(style='Intense Quote')
+    description_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
-    platform_subtitle = doc.add_paragraph("Modified for Platform: ", style='Subtitle')
-    platform_subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if description:
+        for idx, description_line in enumerate(description):
+            r = description_subtitle.add_run(description_line)
+            r.add_break()
+            r.add_break()
+    
+    description_subtitle.add_run("Modified for Platform: ")
     if platform is Platform.XOULAI:
-        platform_subtitle.add_run("Unmodified (Original Xoul AI format)")
+        description_subtitle.add_run("Unmodified (Original Xoul AI format)")
     else:
-        platform_subtitle.add_run(platform)
+        description_subtitle.add_run(platform)
 
     beta_tag = doc.add_paragraph()
-    beta_tag.add_run("BETA TEST", style='Intense Emphasis').font.color.rgb = RGBColor(255, 75, 75) # red
+    r = beta_tag.add_run("BETA TEST", style='Intense Emphasis')
+    r.font.color.rgb = RGBColor(255, 75, 75) # red
+    r.font.size = Pt(16)
     beta_tag.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 def word_add_toc_to_doc(doc: DocxDocument):

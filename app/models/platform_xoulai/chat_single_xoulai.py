@@ -67,22 +67,23 @@ class ChatSingleXoulAI:
 
         return cls(**filtered_data)
     
-    def get_chat_description(self) -> str:
-        if self.conversation and self.conversation.xouls:
-            xoul = self.conversation.xouls[0]
-            return f"""
-                    Character: {xoul.name} ({xoul.slug})
-                    Persona: {', '.join(self.get_persona_names())}
-                    """
+    def get_chat_description(self) -> list[str]:
+        description = []
+
+        if self.conversation:
+            description.append(f"Character: {self.get_character_name()}")
+            description.append(f"Personas: {', '.join(self.get_persona_names())}")
         else:
-            return "No character information available."
+            description.append("ERROR: Conversation Data Missing")
+
+        return description
 
     def get_character_name(self) -> str:
         if self.conversation and self.conversation.xouls:
             xoul = self.conversation.xouls[0]
             return xoul.name
         else:
-            return "Unnamed"
+            return "Unnamed Character"
 
     def get_character_slug(self) -> str:
         if self.conversation and self.conversation.xouls:
@@ -91,7 +92,7 @@ class ChatSingleXoulAI:
         else:
             return "CHAR_ID_MISSING"
         
-    def get_persona_names(self, return_none_if_empty: bool = False) -> Optional[list[str]]:
+    def get_persona_names(self, return_none_if_empty: bool = False) -> list[str]:
             """
             Returns a list of persona names.
 
