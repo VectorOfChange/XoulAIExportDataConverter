@@ -32,40 +32,45 @@ def word_xoulai_add_chat_single_info_to_doc(doc: DocxDocument, chat_info: ChatCo
         if field_name == "xouls":
             doc.add_heading("Characters", level=3)
             if value:
-                for idx, xoul in enumerate(value):
-                    doc.add_heading(f"Xoul {idx + 1}", level=4)
+                for xoul in value:
+                    doc.add_heading(xoul.name or "Unnamed Character", level=4)
                     for sub_field, sub_value in vars(xoul).items():
-                        sub_formatted_name = sub_field.replace('_', ' ').title()
-                        doc.add_heading(sub_formatted_name, level=5)
-                        doc.add_paragraph(str(sub_value) if sub_value is not None else NO_DATA_DESCRIPTION)
+                        if sub_field != "name": # skip name field, it is already used for the heading
+                            sub_formatted_name = sub_field.replace('_', ' ').title()
+                            doc.add_heading(sub_formatted_name, level=5)
+                            doc.add_paragraph(str(sub_value) if sub_value is not None else NO_DATA_DESCRIPTION)
             else:
                 doc.add_paragraph(NO_DATA_DESCRIPTION)
 
         elif field_name == "personas":
             doc.add_heading("Personas", level=3)
             if value:
-                for idx, persona in enumerate(value):
-                    doc.add_heading(f"Persona {idx + 1}", level=4)
+                for persona in value:
+                    doc.add_heading(persona.name or "Unnamed Persona", level=4)
                     for sub_field, sub_value in vars(persona).items():
-                        sub_formatted_name = sub_field.replace('_', ' ').title()
-                        doc.add_heading(sub_formatted_name, level=5)
-                        doc.add_paragraph(str(sub_value) if sub_value is not None else NO_DATA_DESCRIPTION)
+                        if sub_field != "name": # skip name field, it is already used for the heading
+                            sub_formatted_name = sub_field.replace('_', ' ').title()
+                            doc.add_heading(sub_formatted_name, level=5)
+                            doc.add_paragraph(str(sub_value) if sub_value is not None else NO_DATA_DESCRIPTION)
             else:
                 doc.add_paragraph(NO_DATA_DESCRIPTION)
 
         elif field_name == "scenario":
             doc.add_heading("Scenario", level=3)
             if value:
-                for sub_field, sub_value in vars(value).items():
-                    sub_formatted_name = sub_field.replace('_', ' ').title()
-                    doc.add_heading(sub_formatted_name, level=4)
-                    if isinstance(sub_value, list):
-                        if sub_value:
-                            doc.add_paragraph(", ".join(str(item) for item in sub_value))
-                        else:
-                            doc.add_paragraph(NO_DATA_DESCRIPTION)
-                    else:
-                        doc.add_paragraph(str(sub_value) if sub_value is not None else NO_DATA_DESCRIPTION)
+                for scenario in value:
+                    doc.add_heading(scenario.name or "Unnamed Scenario", level=4)
+                    for sub_field, sub_value in vars(value).items():
+                        if sub_field != "name": # skip name field, it is already used for the heading
+                            sub_formatted_name = sub_field.replace('_', ' ').title()
+                            doc.add_heading(sub_formatted_name, level=4)
+                            if isinstance(sub_value, list):
+                                if sub_value:
+                                    doc.add_paragraph(", ".join(str(item) for item in sub_value))
+                                else:
+                                    doc.add_paragraph(NO_DATA_DESCRIPTION)
+                            else:
+                                doc.add_paragraph(str(sub_value) if sub_value is not None else NO_DATA_DESCRIPTION)
             else:
                 doc.add_paragraph(NO_DATA_DESCRIPTION)
 
