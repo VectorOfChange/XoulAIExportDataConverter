@@ -99,17 +99,18 @@ def word_xoulai_add_chat_multi_transcript_to_doc(doc: Document, messages: list[C
         doc.add_paragraph("No chat messages available.")
         return
 
-    # Define shades of grey for different speakers.  More visually appealing.
-    grey_shades = [
-        "F8F8F8",  # Very light grey
-        #"F0F0F0",  # Light grey
-        "E0E0E0",  # Medium light grey
-        #"D0D0D0",  # Medium grey
-        "C0C0C0",  # Medium dark grey
-        #"B0B0B0",  # Dark Medium Grey
-        "A0A0A0",  # Dark grey
-        #"909090",  # Very dark grey
-    ]
+    # Define desaturated, light shades of color for different speakers.  Visually distinctive but not distracting.
+    color_shades = {
+        "#E0E0E0": "Light Grey",
+        "#B0B0B0": "Medium Dark Grey",
+        "#909090": "Very Dark Grey",
+        "#E0FFFF": "Light Cyan",
+        "#FFF0F5": "Lavender Blush",
+        "#FFFACD": "Lemon Chiffon",
+        "#FFDAB9": "Peachpuff",
+        "#E0F8E0": "Very Pale Green"
+    }
+
     speaker_colors = {}  # Dictionary to store assigned colors
 
     def get_speaker_color(speaker_name: str) -> str:
@@ -126,8 +127,8 @@ def word_xoulai_add_chat_multi_transcript_to_doc(doc: Document, messages: list[C
         if speaker_name not in speaker_colors:
             # If this is a new speaker, assign them a color.
             num_speakers = len(speaker_colors)
-            color_index = num_speakers % len(grey_shades)  # Cycle through shades
-            speaker_colors[speaker_name] = grey_shades[color_index]
+            color_index = num_speakers % len(color_shades)  # Cycle through shades
+            speaker_colors[speaker_name] = color_shades[color_index]
         return speaker_colors[speaker_name]
 
     def add_styled_paragraph(doc: Document, text: str, fill_color: str, font_color: RGBColor, align: WD_ALIGN_PARAGRAPH):
