@@ -91,6 +91,11 @@ def word_add_info_section_to_doc(doc: DocxDocument, platform: Platform):
     doc.add_heading("About this Document", level=2)
     doc.add_paragraph("This is the information that is within the Xoul Data Export ZIP file. Icon and picture links have been removed because they were just links to the Xoul AI site, which is now offline.")
     
+    # color section
+    doc.add_heading("Color in this Document", level=2)
+    doc.add_paragraph(f"This document may use colors. This is particularly used in group chat transcripts to highlight the different characters. These colors are very light so they don't strain your eyes while you read.") 
+    doc.add_paragraph("If you are using Word in Dark Mode or with a Dark Office Theme, Word will automatically adjust the colors and they will become dark and intense. If you find this difficult to read, try changing your Office Theme to a light theme. You can find this settings under: File --> Account --> Office Theme in modern versions of Word.)")
+
     # data manipulation section
     doc.add_heading("Data Adjustment/Manipulation", level=2)
     if platform is Platform.XOULAI:

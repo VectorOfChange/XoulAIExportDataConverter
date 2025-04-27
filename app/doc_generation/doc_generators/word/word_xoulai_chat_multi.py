@@ -35,14 +35,14 @@ def word_xoulai_add_chat_multi_transcript_to_doc(doc: Document, messages: list[C
 
     # Define desaturated, light shades of color for different speakers.  Visually distinctive but not distracting.
     color_shades = [
-        "#E0E0E0", # Light Grey
-        "#B0B0B0", # Medium Dark Grey
+        "#D3D3D3", # Light Grey
         "#909090", # Very Dark Grey
         "#E0FFFF", # Light Cyan
-        "#FFF0F5", # Lavender Blush
         "#FFFACD", # Lemon Chiffon
         "#FFDAB9", # Peachpuff
         "#E0F8E0", # Very Pale Green
+        "#F8D7D9", # Soft Pink
+        "#F0F0FA", # Very Pale Lavender
     ]
 
     speaker_colors = {}  # Dictionary to store assigned colors
