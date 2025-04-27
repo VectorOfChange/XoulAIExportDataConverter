@@ -4,7 +4,7 @@ import json
 import textwrap
 from typing import Optional, Any, List
 from utils.custom_logger import log
-from models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
+from models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatLorebookXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
 
 @dataclass
 class ChatMultiMessageXoulAI:
@@ -38,6 +38,7 @@ class ChatMultiXoulAI:
                     conversation_fields = {f.name for f in fields(ChatConversationXoulAI)}
                     filtered_conversation = {}
 
+                    # TODO: Don't I need to filter each of these? Maybe I need to embed it in each class itself.
                     for c_key in conversation_data:
                         if c_key in conversation_fields:
                             if c_key == "xouls" and isinstance(conversation_data[c_key], list):
@@ -46,6 +47,8 @@ class ChatMultiXoulAI:
                                 filtered_conversation[c_key] = [ChatPersonaXoulAI(**p) for p in conversation_data[c_key] if isinstance(p, dict)]
                             elif c_key == "scenario" and isinstance(conversation_data[c_key], dict):
                                 filtered_conversation[c_key] = ChatScenarioXoulAI(**{k: v for k, v in conversation_data[c_key].items() if k in {f.name for f in fields(ChatScenarioXoulAI)}})
+                            elif c_key == "lorebook" and isinstance(conversation_data[c_key], dict):
+                                filtered_conversation[c_key] = ChatLorebookXoulAI(**conversation_data[c_key])
                             else:
                                 filtered_conversation[c_key] = conversation_data[c_key]
 

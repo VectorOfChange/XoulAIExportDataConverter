@@ -7,5 +7,6 @@ NO_DATA_DESCRIPTION = "None/Empty"
 KNOWN_BUGS = [
     {"type": BugType.APP, "description": "If you click a button, the page might jump down to the very bottom"},
     {"type": BugType.APP, "description": "The file upload may not work on mobile Chrome (or Chrome based browsers like Brave). Workaround: use the 'view desktop page' option of your mobile browser"},
-    {"type": BugType.DATA, "description": "Sometimes the reports show numbered headings instead of the name of the specific item such as characters, personas, etc."},
+    {"type": BugType.DATA, "description": "Objectives (including meters) are malformed or missing. Particularly impacts group chats."},
 ]
+IMAGES_FOLDER_PATH = "images/"

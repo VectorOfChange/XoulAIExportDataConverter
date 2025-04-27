@@ -13,10 +13,10 @@ from models.platform_xoulai.character_xoulai import CharacterXoulAI
 @dataclass
 class AllDataXoulAI:
     platform: Platform = field(init=False, default=Platform.XOULAI)
-    characters: list[CharacterXoulAI]
-    scenarios: list[ScenarioXoulAI]
-    personas: list[PersonaXoulAI]
-    lorebooks: list[LorebookXoulAI]
-    chats_single: list[ChatSingleXoulAI]
+    characters: list[CharacterXoulAI] = field(default_factory=list)
+    scenarios: list[ScenarioXoulAI] = field(default_factory=list)
+    personas: list[PersonaXoulAI] = field(default_factory=list)
+    lorebooks: list[LorebookXoulAI] = field(default_factory=list)
+    chats_single: list[ChatSingleXoulAI] = field(default_factory=list)
     chats_multi: list[ChatMultiXoulAI] = field(default_factory=list)
     

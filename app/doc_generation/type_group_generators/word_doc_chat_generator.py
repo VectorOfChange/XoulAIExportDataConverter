@@ -35,7 +35,7 @@ def generate_chat_word_docs(all_data: AllData, user_options: UserOptions, on_pro
     Returns:
         A list of FileBuffer objects, each containing a generated Word document.
     """
-    doc_buffers: List[FileBuffer] = []
+    doc_buffers: list[FileBuffer] = []
 
     for platform_data in all_data.get_all_platform_data():
         platform_generators = PLATFORM_CONTENT_GENERATORS.get(platform_data.platform)

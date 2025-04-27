@@ -1,6 +1,8 @@
 # models/platform_xoulai/scenario_xoulai.py
 from dataclasses import dataclass, field, fields
-from typing import Optional
+from typing import Any, Optional
+
+from dtos.fetch_image_task import FetchImageTask
 
 
 @dataclass
@@ -28,8 +30,11 @@ class ScenarioObjectiveXoulAI:
 class ScenarioXoulAI:
     source_filename: Optional[str] = None
     name: Optional[str] = None
+    icon_url: Optional[str] = None
+    _fetch_image_task: Optional[FetchImageTask] = None
     social_tags: Optional[list[str]] = None
     slug: Optional[str] = None
+    icon_spec: Optional[str] = None
     definition: Optional[str] = None
     greeting: Optional[str] = None
     lorebook_slug: Optional[str] = None
@@ -56,3 +61,9 @@ class ScenarioXoulAI:
                     filtered_data[key] = data[key]
 
         return cls(**filtered_data)
+    
+    def get_public_fields(self) -> dict[str, Any]:
+        return {k: v for k, v in vars(self).items() if not k.startswith('_')}
+
+    def set_fetch_image_task(self, fetch_image_task: Optional[FetchImageTask]) -> None:
+        self._fetch_image_task = fetch_image_task

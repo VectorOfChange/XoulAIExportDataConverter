@@ -4,6 +4,10 @@ import streamlit as st
 import zipfile
 from io import BytesIO
 
+from image_fetching.image_fetching import fetch_images
+from dtos.file_buffer import FileBuffer
+from image_fetching.fetch_image_tasks_discovery import discover_fetch_image_tasks
+from image_fetching.fetch_image_task_register import FetchImageTaskRegister
 from dtos.user_options import UserOptions
 from globals.globals import APP_VERSION, KNOWN_BUGS
 from doc_generation.doc_generation_manager import generate_all_docs
@@ -11,14 +15,30 @@ from extract.json_extractor import extract_data
 from utils.custom_logger import log
 from utils.custom_timestamp import get_timestamp
 
+# TODO: Add success/error file notices
+# TODO: Fix logging for missing dynamic generators
+# TODO: Download images
+# TODO: Put log into zip file as a file
+# TODO: Put documents into folders
+# TODO: In chat transcript, make name and following paragraph stay together
+# TODO: Refactor main.py to use main():
+    # def main():
+    #     st.title("My App")
+    #     st.write("Hello World!")
+    #     # your other code here
+
+    # if __name__ == "__main__":
+    #     main()
+
 # Constants
 # moved to globals module
+
 
 # Session state for user options
 if "user_options_disabled" not in st.session_state:
     st.session_state.user_options_disabled = False
 
-# Session state for holding output
+# Session state for holding data
 # if you add something here, remember to reset it in the reset button action
 if "processed" not in st.session_state:
     st.session_state.processed = False
@@ -36,13 +56,15 @@ if "completed_doc_files" not in st.session_state:
     st.session_state.completed_doc_files = 0
 if "completed_tasks" not in st.session_state:
     st.session_state.completed_tasks = 0
+if "fetch_image_task_registry" not in st.session_state:
+    st.session_state.fetch_image_task_register = FetchImageTaskRegister()
 
 # flags
 reset_button_visible = False
 
 def sanitize_filename(filename: str) -> str:
     # Remove unsafe characters and trim length
-    filename = re.sub(r'[^a-zA-Z0-9_\-\. ]', '_', filename)
+    filename = re.sub(r'[^a-zA-Z0-9_\-\.\\\/ ]', '_', filename)
     return filename[:200]  # Limit to 200 characters
 
 # Function to disable the user options
@@ -64,6 +86,7 @@ def reset_app():
     st.session_state.total_doc_files = 0
     st.session_state.completed_doc_files = 0
     st.session_state.completed_tasks = 0
+    st.session_state.fetch_image_task_register = FetchImageTaskRegister()
 
 # Function to show reset button
 def show_reset_button():
@@ -123,6 +146,36 @@ def update_extraction_progress(completed_files: int) -> None:
     else:
         extraction_status_text.text(status_message)
     
+    log(status_message)
+
+# Function to update progress for fetching images
+def update_fetch_images_progress(completed_images: int, total_images: int) -> None:
+    """
+    Update the fetch images progress bar and status text with the number of completed files.
+
+    Args:
+        completed_files (int): The number of files that have been fully processed.
+            NOTE: If this function is called from within a loop using enumerate,
+            ensure you pass in (index + 1) since enumerate is zero-indexed and this
+            function expects a 1-based count of completed files.
+
+    Example:
+        for i, file in enumerate(files):
+            process(file)
+            update_fetch_images_progress(i + 1)
+
+    This function can also be called from non-loop contexts where an exact count of
+    completed files is tracked separately.
+    """
+    progress = completed_images / total_images
+    fetch_images_progress_bar.progress(progress)
+    status_message = f"Downloaded {completed_images} of {total_images} Images..."
+    
+    if progress == 1:
+        fetch_images_status_text.success("🎉 " + status_message)
+    else:
+        fetch_images_status_text.text(status_message)
+
     log(status_message)
 
 # Function to update progress for JSON extraction
@@ -287,6 +340,13 @@ with st.expander("Xoul Data to Process", expanded=True):
     if not any(user_option_content_choices):
         st.error("You must choose at least one type of Xoul data to process.")
 
+with st.expander("Download Images/Avatars from Xoul AI Servers", expanded=True):
+    st.markdown("The Xoul AI servers still have the images/avatars available for download as of 27 April 2025. If you check this box, those images will be downloaded from the Xoul servers (for the Xoul data types you've chosen above) and included in the ZIP download file.")
+    st.markdown("**Please only check the box if you need to get the images.** Definitely get the images once - that's what this function is here for. But please leave it unchecked for duplicate generations/do-overs. This is because downloading the images generates traffic on the Xoul AI servers, and we don't want to do that more than necessary.")
+    
+    st.checkbox("Download Images from Xoul AI Servers (Only If You Need It)", value=False, disabled=st.session_state.user_options_disabled, key="app_fetch_images")
+    
+
 with st.expander("Platform Specific Adjustment", expanded=True):
     st.markdown("Choose the platforms you want to generate data for. Each selection will generate a set of files optimized for use with the platform.")
     
@@ -297,6 +357,7 @@ with st.expander("Platform Specific Adjustment", expanded=True):
     with user_option_platform_col1:
         user_option_platform_choices.append(st.checkbox("Unmodified (Original Xoul AI Data)", value=True, disabled=st.session_state.user_options_disabled, key="app_platform_xoulai"))
         # user_option_platform_choices.append(st.checkbox("MyAI", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_myai"))
+        # user_option_platform_choices.append(st.checkbox("Tavern Card v2", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_tavern_card"))
     
     # with user_option_platform_col2:
     #     user_option_platform_choices.append(st.checkbox("Wyvern", value=False, disabled=st.session_state.user_options_disabled, key="app_platform_wyvern"))
@@ -375,6 +436,14 @@ if uploaded_file is not None:
             doc_generation_progress_bar = st.progress(0)
             doc_generation_status_text = st.empty()
 
+        if user_options.is_fetch_images_selected():
+            # Fetch Images Progress bar
+            fetch_images_container = st.container()
+            with fetch_images_container:
+                st.markdown("Downloading Images Progress")
+                fetch_images_progress_bar = st.progress(0)
+                fetch_images_status_text = st.empty()
+
         try:
             zip_bytes = BytesIO(uploaded_file.read())
 
@@ -391,30 +460,52 @@ if uploaded_file is not None:
 
                 # TODO: add success and error files count
 
-
         except Exception as unzip_e:
             st.error(f"❌ Failed to open ZIP: {unzip_e}")
             log(f"Failed to open ZIP: {unzip_e}")
 
-        # Manipulate Data
+        # Manipulate Data # TODO: Create data manipulation function here
         increment_data_manipulation_progress()
 
-        # GENERATE AND SAVE DOCUMENTS
-        # TODO: split into two sections to get better logging and error reporting
+        # DISCOVER FETCH IMAGE TASKS
+        if user_options.is_fetch_images_selected():
+            discover_fetch_image_tasks(all_data, user_options)
+
+        # GENERATE DOCUMENTS
+        generated_file_buffers: list[FileBuffer] = []
+
         try:
             with progress_col3, st.spinner("Generating Docs..."):
                 generated_doc_buffers = generate_all_docs(all_data, user_options, on_progress=increment_doc_generation_progress)
+                generated_file_buffers.extend(generated_doc_buffers)
 
+        except Exception as generate_docs_e:
+            st.error(f"❌ Failed to generate documents: {generate_docs_e}")
+            log(f"Failed to generate documents: {generate_docs_e}")
+
+        # FETCH IMAGES
+        if user_options.is_fetch_images_selected():
+            try:
+                with fetch_images_container, st.spinner("Downloading images from Xoul AI servers..."):
+                    image_buffers = fetch_images(on_progress=update_fetch_images_progress)
+                    generated_file_buffers.extend(image_buffers)
+            
+            except Exception as fetch_images_e:
+                st.error(f"❌ Failed to fetch images: {fetch_images_e}")
+                log(f"Failed to fetch images: {fetch_images_e}")
+
+        # SAVE FILES 
+        try:
             # Open output ZIP
             # Create a new in-memory zip to hold output files
             output_zip_buffer = BytesIO()
 
             with zipfile.ZipFile(output_zip_buffer, "w", zipfile.ZIP_DEFLATED) as output_zip: 
-                for doc_buffer in generated_doc_buffers:
-                    doc_filename = sanitize_filename(doc_buffer.filename)
-                    output_zip.writestr(doc_filename, doc_buffer.buffer.getvalue())
-                    log(f"Document added to ZIP: {doc_filename}")
-
+                for file_buffer in generated_file_buffers:
+                    file_filename = sanitize_filename(file_buffer.filename)
+                    output_zip.writestr(file_filename, file_buffer.buffer.getvalue())
+                    log(f"Document added to ZIP: {file_filename}")
+            
             # Finish writing to ZIP
             output_zip_buffer.seek(0)
 
@@ -422,9 +513,9 @@ if uploaded_file is not None:
             st.session_state.output_zip = output_zip_buffer.getvalue()
             st.session_state.processed = True
 
-        except Exception as generate_docs_e:
-            st.error(f"❌ Failed to generate or save documents: {generate_docs_e}")
-            log(f"Failed to generate or save documents: {generate_docs_e}")
+        except Exception as save_files_e:
+            st.error(f"❌ Failed to save ZIP file: {save_files_e}")
+            log(f"Failed to save ZIP File: {save_files_e}")
 
         # Generate log output
         st.session_state.log_output = "\n".join(st.session_state.log_messages)

@@ -8,8 +8,9 @@ from docx.shared import RGBColor, Pt
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement 
 
+from doc_generation.doc_generators.word.word_xoulai_common import word_xoulai_add_chat_info_to_doc
 from models.platform_xoulai.chat_multi_xoulai import ChatMultiMessageXoulAI
-from doc_generation.doc_generators.word.word_common import word_add_info_section_to_doc, word_add_known_bugs_section_to_doc, word_add_title_page_to_doc, word_add_toc_to_doc, word_xoulai_add_chat_info_to_doc
+from doc_generation.doc_generators.word.word_common import word_add_info_section_to_doc, word_add_known_bugs_section_to_doc, word_add_title_page_to_doc, word_add_toc_to_doc
 from dtos.file_buffer import FileBuffer
 from enums.type_group import TypeGroup
 from globals.globals import NO_DATA_DESCRIPTION

@@ -1,6 +1,8 @@
 # models/platform_xoulai/persona_xoulai.py
 from dataclasses import dataclass, fields
-from typing import Optional
+from typing import Any, Optional
+
+from dtos.fetch_image_task import FetchImageTask
 
 
 @dataclass
@@ -14,6 +16,9 @@ class PersonaPromptSpecXoulAI:
 class PersonaXoulAI:
     source_filename: Optional[str] = None
     name: Optional[str] = None
+    icon_url: Optional[str] = None
+    icon_spec: Optional[str] = None
+    _fetch_image_task: Optional[FetchImageTask] = None
     slug: Optional[str] = None
     prompt: Optional[str] = None
     prompt_spec: Optional[PersonaPromptSpecXoulAI] = None
@@ -31,3 +36,9 @@ class PersonaXoulAI:
                     filtered_data[key] = data[key]
 
         return cls(**filtered_data)
+
+    def get_public_fields(self) -> dict[str, Any]:
+        return {k: v for k, v in vars(self).items() if not k.startswith('_')}
+    
+    def set_fetch_image_task(self, fetch_image_task: Optional[FetchImageTask]) -> None:
+        self._fetch_image_task = fetch_image_task

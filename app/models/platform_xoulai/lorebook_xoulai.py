@@ -1,6 +1,8 @@
 # models/platform_xoulai/lorebook_xoulai.py
 from dataclasses import dataclass, field, fields
-from typing import Optional, List
+from typing import Any, Optional, List
+
+from dtos.fetch_image_task import FetchImageTask
 
 
 @dataclass
@@ -22,6 +24,8 @@ class LorebookXoulAI:
     source_filename: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
+    icon_url: Optional[str] = None
+    _fetch_image_task: Optional[FetchImageTask] = None
     social_tags: Optional[List[str]] = None
     visibility: Optional[str] = None
     posted_to_xoul: Optional[str] = None
@@ -48,3 +52,10 @@ class LorebookXoulAI:
                     filtered_data[key] = data[key]
 
         return cls(**filtered_data)
+    
+    def get_public_fields(self) -> dict[str, Any]:
+        return {k: v for k, v in vars(self).items() if not k.startswith('_')}
+    
+    def set_fetch_image_task(self, fetch_image_task: Optional[FetchImageTask]) -> None:
+        self._fetch_image_task = fetch_image_task
+

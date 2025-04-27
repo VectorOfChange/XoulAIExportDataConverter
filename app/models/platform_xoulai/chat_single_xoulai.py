@@ -1,7 +1,7 @@
 # models/platform_xoulai/chat_single_xoulai.py
 from dataclasses import dataclass, field, fields
 from typing import Optional, Any
-from models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
+from models.platform_xoulai.chat_common_xoulai import ChatCharacterXoulAI, ChatConversationXoulAI, ChatLorebookXoulAI, ChatMessageMetadataXoulAI, ChatPersonaXoulAI, ChatScenarioXoulAI
 
 @dataclass
 class ChatSingleMessageXoulAI:
@@ -37,6 +37,8 @@ class ChatSingleXoulAI:
                                 filtered_conversation[c_key] = [ChatPersonaXoulAI(**p) for p in conversation_data[c_key] if isinstance(p, dict)]
                             elif c_key == "scenario" and isinstance(conversation_data[c_key], dict):
                                 filtered_conversation[c_key] = ChatScenarioXoulAI(**conversation_data[c_key])
+                            elif c_key == "lorebook" and isinstance(conversation_data[c_key], dict):
+                                filtered_conversation[c_key] = ChatLorebookXoulAI(**conversation_data[c_key])
                             else:
                                 filtered_conversation[c_key] = conversation_data[c_key]
 
