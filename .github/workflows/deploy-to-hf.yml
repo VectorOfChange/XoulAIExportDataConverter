@@ -54,9 +54,10 @@ jobs:
             short_description: 'Converter for Xoul AI Export Data'
             ---
             
-            # THIS REPO IS A CLONE
-            This repo is a clone of the github repo at: [https://github.com/VectorOfChange/XoulAIExportDataConverter](https://github.com/VectorOfChange/XoulAIExportDataConverter)  
-            This repo is unmonitored. **DO NOT INTERACT WITH THIS REPO!**  
+            # THIS REPO IS AN AUTOMATED CLONE
+            This repo is an automated clone of the Github repo at: [https://github.com/VectorOfChange/XoulAIExportDataConverter](https://github.com/VectorOfChange/XoulAIExportDataConverter)  
+            This repo is _unmonitored_. It is automatically updated by a robot with a clone of the Github repo.  
+            ## DO NOT INTERACT WITH THIS REPO!   
             If you have issues, questions, or comments, use the contact methods from within the app (in the sidebar) or contact me on the Github repo.
         run: |
           # Insert HF header above existing README
