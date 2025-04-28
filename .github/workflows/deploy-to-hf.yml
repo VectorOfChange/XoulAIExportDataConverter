@@ -23,17 +23,17 @@ jobs:
         run: |
           git clone https://${{ secrets.HF_USERNAME }}:${{ secrets.HF_WRITE_TOKEN }}@huggingface.co/spaces/${{ secrets.HF_USERNAME }}/${{ secrets.HF_SPACE_NAME }} hf-deploy
 
-      - name: List files before rsync
-        run: ls -al
+      # DEBUG
+      # - name: List files before rsync
+      #   run: ls -al
 
       - name: Prepare Hugging Face deployment folder
         run: |
           # Copy app files
-          rsync -av --delete --exclude='.git' --exclude '.github' . hf-deploy/
+          rsync -av --delete --exclude='.git' --exclude '.github' --exclude 'hf-deploy' . hf-deploy/
 
       - name: Add header to README.md file
-        run: |
-          # Define Hugging Face config as a YAML block
+        env:
           HF_HEADER: |-
             ---
             title: XoulAIExportDataConverter
@@ -48,7 +48,7 @@ jobs:
             license: agpl-3.0
             short_description: 'Converter for Xoul AI Export Data'
             ---
-
+        run: |
           # Insert HF header above existing README
           echo "$HF_HEADER" > hf-deploy/hf_header.txt
           if [ -f hf-deploy/README.md ]; then
