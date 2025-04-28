@@ -32,6 +32,11 @@ jobs:
           # Copy app files
           rsync -av --delete --exclude='.git' --exclude '.github' --exclude 'hf-deploy' . hf-deploy/
 
+      - name: Move requirements.txt to HF root
+        run: |
+          # Move requirements.txt to HF root
+          mv hf-deploy/app/requirements.txt hf-deploy/
+        
       - name: Add header to README.md file
         env:
           HF_HEADER: |-
