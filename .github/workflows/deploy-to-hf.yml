@@ -66,4 +66,4 @@ jobs:
           git config user.name "${{ secrets.HF_GIT_USERNAME }}"
           git config user.email "${{ secrets.HF_GIT_EMAIL }}"
           git add -A
-          git diff-index --quiet HEAD || (git commit -m -s "Deploy: $MESSAGE ($SHORT_SHA)" && git push)
+          git diff-index --quiet HEAD || (git commit -s -m "Deploy: $MESSAGE ($SHORT_SHA)" && git push)
