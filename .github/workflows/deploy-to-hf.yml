@@ -23,11 +23,16 @@ jobs:
         run: |
           git clone https://${{ secrets.HF_USERNAME }}:${{ secrets.HF_WRITE_TOKEN }}@huggingface.co/spaces/${{ secrets.HF_USERNAME }}/${{ secrets.HF_SPACE_NAME }} hf-deploy
 
+      - name: List files before rsync
+        run: ls -al
+
       - name: Prepare Hugging Face deployment folder
         run: |
           # Copy app files
           rsync -av --delete --exclude='.git' --exclude '.github' . hf-deploy/
 
+      - name: Add header to README.md file
+        run: |
           # Define Hugging Face config as a YAML block
           HF_HEADER: |-
             ---
