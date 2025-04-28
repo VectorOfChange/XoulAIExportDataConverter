@@ -291,6 +291,7 @@ with st.sidebar:
         st.markdown("Everything is 100% private. All data is kept in memory on the server, nothing is ever written to disk.")
         st.markdown("All of your data is permanently deleted from the server memory as soon as you close or refresh the webpage.")
         st.markdown("No human or machine can ever access or review your data.")
+        st.markdown("You can also download the source code and run the app entirely on your own computer! This means no information ever leaves your computer, and is the most secure way to run the app. Instructions are provided in the Github repository (linked above in the ```Source Code```). You can also send me a message if you want help getting it running on your own computer, I'm happy to help.")
 
     with st.expander("App Version"):
         st.markdown(f"Version: ```{APP_VERSION}```") # TODO: Add app version to log
