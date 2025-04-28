@@ -1,0 +1,63 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout GitHub repo
+        uses: actions/checkout@v4
+
+      - name: Get latest Git commit info
+        id: vars
+        run: |
+          echo "MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Clone Hugging Face Space
+        run: |
+          git clone https://${{ secrets.HF_USERNAME }}:${{ secrets.HF_WRITE_TOKEN }}@huggingface.co/spaces/${{ secrets.HF_USERNAME }}/${{ secrets.HF_SPACE_NAME }} hf-deploy
+
+      - name: Prepare Hugging Face deployment folder
+        run: |
+          # Copy app files
+          rsync -av --delete --exclude='.git' . hf-deploy/
+
+          # Define Hugging Face config as a YAML block
+          HF_HEADER: |-
+            ---
+            title: XoulAIExportDataConverter
+            emoji: 🦀
+            colorFrom: yellow
+            colorTo: purple
+            sdk: streamlit
+            sdk_version: 1.44.1
+            python_version: 3.11
+            app_file: app/main.py
+            pinned: false
+            license: agpl-3.0
+            short_description: 'Converter for Xoul AI Export Data'
+            ---
+
+          # Insert HF header above existing README
+          echo "$HF_HEADER" > hf-deploy/hf_header.txt
+          if [ -f hf-deploy/README.md ]; then
+            cat hf-deploy/hf_header.txt hf-deploy/README.md > hf-deploy/README_temp.md
+            mv hf-deploy/README_temp.md hf-deploy/README.md
+          else
+            mv hf-deploy/hf_header.txt hf-deploy/README.md
+          fi
+
+          rm -f hf-deploy/hf_header.txt
+
+      - name: Commit and Push to Hugging Face
+        run: |
+          cd hf-deploy
+          git config user.name "${{ secrets.HF_GIT_USERNAME }}"
+          git config user.email "${{ secrets.HF_GIT_EMAIL }}"
+          git add -A
+          git diff-index --quiet HEAD || (git commit -m "Deploy: $MESSAGE ($SHORT_SHA)" && git push)
