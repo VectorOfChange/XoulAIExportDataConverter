@@ -565,6 +565,7 @@ st.markdown("""
                 * FIX: Only include bugs that impact data in the documents
             * Version ```0.0.5```:
                 * DEV: Add multi-host platform management
+                * DEV: Deploy to Hugging Face Spaces
             """)
 
 st.subheader("Page suddenly scrolled to the bottom? It's a bug. Sorry about that! Scroll up ⬆️ to find your files again.", divider=False)
