@@ -15,7 +15,8 @@ jobs:
       - name: Get latest Git commit info
         id: vars
         run: |
-          echo "MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+          # echo "MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+          echo "MESSAGE=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Clone Hugging Face Space
@@ -25,7 +26,7 @@ jobs:
       - name: Prepare Hugging Face deployment folder
         run: |
           # Copy app files
-          rsync -av --delete --exclude='.git' . hf-deploy/
+          rsync -av --delete --exclude='.git' --exclude '.github' . hf-deploy/
 
           # Define Hugging Face config as a YAML block
           HF_HEADER: |-
@@ -60,4 +61,4 @@ jobs:
           git config user.name "${{ secrets.HF_GIT_USERNAME }}"
           git config user.email "${{ secrets.HF_GIT_EMAIL }}"
           git add -A
-          git diff-index --quiet HEAD || (git commit -m "Deploy: $MESSAGE ($SHORT_SHA)" && git push)
+          git diff-index --quiet HEAD || (git commit -m -s "Deploy: $MESSAGE ($SHORT_SHA)" && git push)
