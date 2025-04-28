@@ -4,12 +4,13 @@ import streamlit as st
 import zipfile
 from io import BytesIO
 
+from utils.version import get_app_version
 from image_fetching.image_fetching import fetch_images
 from dtos.file_buffer import FileBuffer
 from image_fetching.fetch_image_tasks_discovery import discover_fetch_image_tasks
 from image_fetching.fetch_image_task_register import FetchImageTaskRegister
 from dtos.user_options import UserOptions
-from globals.globals import APP_VERSION, KNOWN_BUGS
+from globals.globals import KNOWN_BUGS
 from doc_generation.doc_generation_manager import generate_all_docs
 from extract.json_extractor import extract_data
 from utils.custom_logger import log
@@ -219,20 +220,20 @@ with st.sidebar:
         st.markdown("""
                     | Data Type | Status |
                     |----|----|
-                    | Xouls | ```beta``` | 
-                    | Personas | ```beta``` | 
-                    | Scenarios | ```beta``` | 
-                    | Lorebooks | ```beta``` |
-                    | Single Chats | ```beta``` |
-                    | Group Chats | ```beta``` |
-                    | Images/Avatars | ```in progress``` |
+                    | Xouls | ```released``` | 
+                    | Personas | ```released``` | 
+                    | Scenarios | ```released``` | 
+                    | Lorebooks | ```released``` |
+                    | Single Chats | ```released``` |
+                    | Group Chats | ```released``` |
+                    | Images/Avatars | ```released``` |
                     """)
         
     with st.expander("Output File Types"):
         st.markdown("""
                     | File Type | Extension | Status |
                     |----|----|----|
-                    | Word | .docx | ```beta``` | 
+                    | Word | .docx | ```released``` | 
                     | Markdown | .md | ```planned``` | 
                     | Text | .txt | ```planned``` | 
                     | JSON (for supported platforms) | ```planned``` |
@@ -291,10 +292,10 @@ with st.sidebar:
         st.markdown("Everything is 100% private. All data is kept in memory on the server, nothing is ever written to disk.")
         st.markdown("All of your data is permanently deleted from the server memory as soon as you close or refresh the webpage.")
         st.markdown("No human or machine can ever access or review your data.")
-        st.markdown("You can also download the source code and run the app entirely on your own computer! This means no information ever leaves your computer, and is the most secure way to run the app. Instructions are provided in the Github repository (linked above in the ```Source Code```). You can also send me a message if you want help getting it running on your own computer, I'm happy to help.")
+        st.markdown("You can also download the source code and run the app entirely on your own computer! This means no information ever leaves your computer, and is the most secure way to run this application. Instructions are provided in the Github repository (linked above in the ```Source Code```). You can also send me a message if you want help getting it running on your own computer, I'm happy to help.")
 
     with st.expander("App Version"):
-        st.markdown(f"Version: ```{APP_VERSION}```") # TODO: Add app version to log
+        st.markdown(f"Version: ```{get_app_version()}```") # TODO: Add app version to log
 
 # MAIN PAGE
 st.title("📄 Xoul AI Data Converter")

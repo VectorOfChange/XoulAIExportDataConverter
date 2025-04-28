@@ -1,10 +1,11 @@
 # platform_specific_generators/word/word_common.py
 from docx.document import Document as DocxDocument
 
+from utils.version import get_app_version
 from enums.bug_type import BugType
 from enums.platform import Platform
 from enums.type_group import TypeGroup
-from globals.globals import APP_VERSION, KNOWN_BUGS
+from globals.globals import KNOWN_BUGS, APP_VERSION_TAG
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement 
@@ -65,14 +66,14 @@ def word_add_info_section_to_doc(doc: DocxDocument, platform: Platform):
 
     # App Version
     doc.add_heading("App Version")
-    doc.add_paragraph(f"App Version: {APP_VERSION}")
+    doc.add_paragraph(f"App Version: {get_app_version()}")
 
 def word_add_known_bugs_section_to_doc(doc: DocxDocument):
     doc.add_page_break()
     
     doc.add_heading("Known Bugs and Issues", level=1)
     
-    doc.add_paragraph(f"Known bugs and issue with app version {APP_VERSION} that impact data integrity or data quality (bugs that do not impact data are not listed here):")
+    doc.add_paragraph(f"Known bugs and issue with app version {get_app_version()} that impact data integrity or data quality (bugs that do not impact data are not listed here):")
     
     data_bugs = [bug["description"] for bug in KNOWN_BUGS if bug["type"] == BugType.DATA]
 
@@ -107,11 +108,12 @@ def word_add_title_page_to_doc(doc: DocxDocument, platform: Platform, type_group
     else:
         description_subtitle.add_run(platform)
 
-    beta_tag = doc.add_paragraph()
-    r = beta_tag.add_run("BETA TEST", style='Intense Emphasis')
-    r.font.color.rgb = RGBColor(255, 75, 75) # red
-    r.font.size = Pt(16)
-    beta_tag.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    if APP_VERSION_TAG:
+        version_tag = doc.add_paragraph()
+        r = version_tag.add_run(APP_VERSION_TAG, style='Intense Emphasis')
+        r.font.color.rgb = RGBColor(255, 75, 75) # red
+        r.font.size = Pt(16)
+        version_tag.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 def word_add_toc_to_doc(doc: DocxDocument):
     doc.add_page_break()
